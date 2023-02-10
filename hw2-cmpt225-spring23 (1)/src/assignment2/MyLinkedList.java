@@ -124,7 +124,7 @@ public class MyLinkedList<T> {
 		}
 		try {
 			return removeItem(dir);
-		} catch (NoSuchElementException e) {
+		} catch (NoSuchElementException e) {	// Rethrow exception
 			throw new NoSuchElementException();
 		}
 	}
@@ -140,7 +140,7 @@ public class MyLinkedList<T> {
 		}
 		try {
 			return removeItem(dir);
-		} catch (NoSuchElementException e) {
+		} catch (NoSuchElementException e) {	// rethrow exception
 			throw new NoSuchElementException();
 		}
 	}
@@ -165,28 +165,30 @@ public class MyLinkedList<T> {
 
 		if (direction == RIGHT) {
 			retVal = this.tail.data;
-			if (this.tail.prev != null) {
+			if (this.tail.prev != null) {	// Check if prev node exists before shifting to it
 				this.tail = this.tail.prev;
 				this.tail.next = null;
-			} else {
+				if (this.length % 2 != 0) {
+					this.mid = this.mid.prev;
+				}
+			} else {						// LinkedList is empty
 				this.tail = null;
-			}
-
-			if (this.length % 2 != 0) {
-				this.mid = this.mid.prev;
+				this.head = null;
+				this.mid = null;
 			}
 		} else if (direction == LEFT) {
 			retVal = this.head.data;
-			if (this.head.next != null) {
+			if (this.head.next != null) {	// Check if next node exists before shifting to it
 				this.head = this.head.next;
 				this.head.prev = null;
-			} else {
+				if ((this.length % 2) == 0) {
+					this.mid = this.mid.next;
+				}
+			} else {						// LinkedList is empty
 				this.head = null;
+				this.mid = null;
+				this.tail = null;
 			}
-
-			if ((this.length % 2) == 0) {
-				this.mid = this.mid.next;
-			};
 		}
 		return retVal;
 	}
@@ -198,15 +200,20 @@ public class MyLinkedList<T> {
 	public void reverse() {
 		if (this.reverse) {
 			this.reverse = false;
-			if (this.length % 2 == 0) {
-				this.mid = this.mid.next;
+			if (this.length > 0) {
+				if (this.length % 2 == 0) {
+					this.mid = this.mid.next;
+				}
 			}
 		} else {
 			this.reverse = true;
-			if (this.length % 2 == 0) {
-				this.mid = this.mid.prev;
+			if (this.length > 0) {
+				if (this.length % 2 == 0) {
+					this.mid = this.mid.prev;
+				}
 			}
 		}
+
 
 	}
 
