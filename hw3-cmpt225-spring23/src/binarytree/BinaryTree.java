@@ -71,19 +71,20 @@ public class BinaryTree<T> {
 		return depthCount(getRoot(), k);
 	}
 
+	private void applyMapper(BTNode<T> node, Function<? super T, ? extends T> mapper) {
+		if (node == null) {return;}
+
+		node.setData(mapper.apply(node.getData()));
+		applyMapper(node.getLeftChild(), mapper);
+		applyMapper(node.getRightChild(), mapper);
+	}
 
 	public void map(Function<? super T, ? extends T> mapper)  throws NullPointerException{
 		if (getRoot() == null) throw new NullPointerException();
 
-		// TODO implement me
+		applyMapper(getRoot(), mapper);
 	}
 
-	private List<BTNode<T>> searchTree(BTNode<T> searchNode, BTNode<T> currNode, List<BTNode<T>> path) {
-		if (searchNode == currNode) return null;
-		searchTree(searchNode, currNode.getLeftChild(), path);
-		searchTree(searchNode, currNode.getRightChild(), path);
-		return null;
-	}
 	/**
 	 * returns a list containing the path from the root to the node if node is not
 	 * in the tree, throws IllegalArgumentException
@@ -149,7 +150,6 @@ public class BinaryTree<T> {
 	 */
 	public int distance(BTNode<T> node1, BTNode<T> node2) throws NullPointerException, IllegalArgumentException{
 		if (node1 == null || node2 == null || getRoot() == null) throw new NullPointerException();
-		//System.out.println(getCommonNode(getRoot(), node1, node2).getData());
 		BTNode<T> commonNode = getCommonNode(getRoot(), node1, node2);
 		int distance1 = distanceFromCommonNode(commonNode, node1, 0);
 		int distance2 = distanceFromCommonNode(commonNode, node2, 0);
@@ -164,8 +164,7 @@ public class BinaryTree<T> {
 	 * returns a preOrder iterator for the tree
 	 */
 	public Iterator<T> preOrderIterator() {
-		// TODO implement me
-		return null;
+		return new PreOrderIterator<T>(getRoot());
 	}
 
 }

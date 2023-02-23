@@ -140,18 +140,10 @@ public class TestingAssignment3<T> {
 	public static void main(String[] args) {
 		testNumberOfLeaves();
 		testCountDepthK();
-		//testMap();
+		testMap();
 		testPathFromRoot();
-
-		BinaryTree<Integer> tree = createTree();
-		BTNode<Integer> five = tree.getRoot();
-		BTNode<Integer> negativeTwo = five.getLeftChild().getRightChild().getRightChild();
-		BTNode<Integer> six = five.getRightChild();
-		BTNode<Integer> eight = five.getLeftChild().getRightChild().getLeftChild();
-
-		tree.distance(five, six);
 		testDistance();
-		//testPreOrderIterator();
+		testPreOrderIterator();
 	}
 
 }
