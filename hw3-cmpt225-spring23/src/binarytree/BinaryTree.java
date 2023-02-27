@@ -39,14 +39,15 @@ public class BinaryTree<T> {
 
 	/**************** Assignment 3 *************************/
 
-
 	private int leafCount(BTNode<T> node) {
+		if (node == null) return 0;
 		if (node.getLeftChild() == null && node.getRightChild() == null) {
 			return 1;
 		} else {
 			return leafCount(node.getLeftChild()) + leafCount(node.getRightChild());
 		}
 	}
+
 	/**
 	 * returns the number of leaves in the tree
 	 */
@@ -58,6 +59,7 @@ public class BinaryTree<T> {
 	private int depthCount(BTNode<T> node, int k) {
 		if (node == null) return 0;
 		if (k == 0) return 1;
+
 		return depthCount(node.getLeftChild(), k-1) + depthCount(node.getRightChild(), k-1);
 	}
 
@@ -79,7 +81,7 @@ public class BinaryTree<T> {
 		applyMapper(node.getRightChild(), mapper);
 	}
 
-	public void map(Function<? super T, ? extends T> mapper)  throws NullPointerException{
+	public void map(Function<? super T, ? extends T> mapper)  throws NullPointerException {
 		if (getRoot() == null) throw new NullPointerException();
 
 		applyMapper(getRoot(), mapper);
@@ -163,7 +165,8 @@ public class BinaryTree<T> {
 	/**
 	 * returns a preOrder iterator for the tree
 	 */
-	public Iterator<T> preOrderIterator() {
+	public Iterator<T> preOrderIterator() throws NullPointerException {
+		if (getRoot() == null) throw new NullPointerException();
 		return new PreOrderIterator<T>(getRoot());
 	}
 

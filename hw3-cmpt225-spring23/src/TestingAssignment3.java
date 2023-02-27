@@ -25,6 +25,25 @@ public class TestingAssignment3<T> {
 		return new BinaryTree<Integer>(node5);
 	}
 
+	// creating the tree
+	//       5
+	//      /
+	//     2
+	//    /
+	//   1
+	//  /
+	// 4
+	public static BinaryTree<Integer> createTree2() {
+		BTNode<Integer> node4 = new BTNode<Integer>(4);
+		BTNode<Integer> node1 = new BTNode<Integer>(1, node4, null, null);
+
+		BTNode<Integer> node2 = new BTNode<Integer>(2, node1, null, null);
+
+		BTNode<Integer> node5 = new BTNode<Integer>(5, node2, null, null);
+
+		return new BinaryTree<Integer>(node5);
+	}
+
 	public static void testNumberOfLeaves() {
 		BinaryTree<Integer> tree = createTree();
 		if (tree.numberOfLeaves() == 4)
@@ -58,6 +77,7 @@ public class TestingAssignment3<T> {
 	public static void testPathFromRoot() {
 		BinaryTree<Integer> tree = createTree();
 		BTNode<Integer> negativeTwo = tree.getRoot().getLeftChild().getRightChild().getRightChild();
+		BTNode<Integer> noExist = new BTNode<Integer>(4);
 		List<BTNode<Integer>> l = tree.pathFromRoot(negativeTwo);
 		if (l.size() == 4
 				&& l.get(0) == tree.getRoot()
@@ -66,6 +86,12 @@ public class TestingAssignment3<T> {
 			System.out.println("pathFromRoot OK");
 		else
 			System.out.println("pathFromRoot ERROR");
+
+		try {
+			List<BTNode<Integer>> a = tree.pathFromRoot(noExist);
+		} catch (IllegalArgumentException e) {
+			System.out.println("Caught Illegal argument exception");
+		}
 	}
 
 	public static void testDistance() {
@@ -137,6 +163,30 @@ public class TestingAssignment3<T> {
 			System.out.println("preOrderIterator ERROR");
 	}
 
+	public static void testStraightTree() {
+		BinaryTree<Integer> tree = createTree2();
+
+		if (tree.numberOfLeaves() == 1)
+			System.out.println("numberOfLeaves OK");
+		else
+			System.out.println("numberOfLeaves ERROR");
+
+		if (tree.countDepthK(0) == 1 && tree.countDepthK(2) == 1 && tree.countDepthK(5) == 0)
+			System.out.println("countDepthK OK");
+		else
+			System.out.println("countDepthK ERROR");
+
+		Iterator<Integer> it = tree.preOrderIterator();
+		int firstFour[] = {5,2,1,4};
+		for (int i = 0; i < 4; i++)
+			if (!it.hasNext() || it.next()!=firstFour[i])
+				System.out.println("Iterator ERROR");
+
+		if (it.hasNext()) {
+			System.out.println("Iterator ERROR");
+		}
+	}
+
 	public static void main(String[] args) {
 		testNumberOfLeaves();
 		testCountDepthK();
@@ -144,6 +194,8 @@ public class TestingAssignment3<T> {
 		testPathFromRoot();
 		testDistance();
 		testPreOrderIterator();
+
+		testStraightTree();
 	}
 
 }
