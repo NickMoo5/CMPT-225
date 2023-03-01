@@ -44,6 +44,20 @@ public class TestingAssignment3<T> {
 		return new BinaryTree<Integer>(node5);
 	}
 
+	// full tree depth 20 - approx 2,000,000 nodes
+	public static BTNode<Integer> createBigChonkNode(int d) {
+		BTNode<Integer> root = new BTNode<Integer>(d);
+		if (d > 0) {
+			root.setLeftChild(createBigChonkNode(d-1));
+			root.setRightChild(createBigChonkNode(d-1));
+		}
+		return root;
+	}
+
+	public static BinaryTree<Integer> createBigChonkTree() {
+		return new BinaryTree<Integer>(createBigChonkNode(25));
+	}
+
 	public static void testNumberOfLeaves() {
 		BinaryTree<Integer> tree = createTree();
 		if (tree.numberOfLeaves() == 4)
@@ -187,6 +201,25 @@ public class TestingAssignment3<T> {
 		}
 	}
 
+	public static void testChonkTree() {
+		BinaryTree<Integer> tree = createBigChonkTree();
+
+		System.out.println("Number of leaves: " + tree.numberOfLeaves());
+		System.out.println("Depth Count: " + tree.countDepthK(19));
+		tree.map(x -> x * 2);
+
+		BTNode<Integer> eleven = new BTNode<Integer>(11);
+		BTNode<Integer> twelve = new BTNode<Integer>(12);
+
+		try {
+			System.out.println("Distance" + tree.distance(eleven, twelve));
+		} catch (IllegalArgumentException e) {
+			System.out.println("Caught Illegal Argument for Big Chonk Tree");
+		}
+
+
+	}
+
 	public static void main(String[] args) {
 		testNumberOfLeaves();
 		testCountDepthK();
@@ -196,6 +229,7 @@ public class TestingAssignment3<T> {
 		testPreOrderIterator();
 
 		testStraightTree();
+		testChonkTree();
 	}
 
 }
