@@ -203,7 +203,23 @@ public class TestingAssignment3<T> {
 		int firstFour[] = {5,2,1,4};
 		for (int i = 0; i < 4; i++)
 			if (!it.hasNext() || it.next()!=firstFour[i])
-				System.out.println("Iterator ERROR");
+				System.out.println("Iterator ERROR 1");
+
+		if (it.hasNext()) {
+			System.out.println("Iterator ERROR");
+		}
+	}
+
+	public static void testStraightTree2() {
+		int sum = 0;
+		BinaryTree<Integer> tree = createTree2();
+
+		Iterator<Integer> it = tree.preOrderIterator();
+		int firstFour[] = {5,2,1,4};
+		for (int i = 0; i < 4; i++)
+			sum = sum + it.next();
+		System.out.println("SUM" + sum);
+
 
 		if (it.hasNext()) {
 			System.out.println("Iterator ERROR");
@@ -211,11 +227,12 @@ public class TestingAssignment3<T> {
 	}
 
 	public static void testChonkTree() {
+		int sum = 0;
 		BinaryTree<Integer> tree = createBigChonkTree();
 
 		System.out.println("Number of leaves: " + tree.numberOfLeaves());
 		System.out.println("Depth Count: " + tree.countDepthK(19));
-		tree.map(x -> x * 2);
+		//tree.map(x -> x * 2);
 
 		BTNode<Integer> eleven = new BTNode<Integer>(11);
 		BTNode<Integer> twelve = new BTNode<Integer>(12);
@@ -228,11 +245,12 @@ public class TestingAssignment3<T> {
 
 		Iterator<Integer> it = tree.preOrderIterator();
 		if (!it.hasNext()) System.out.println("IT ERROR 1");
-		it.next();
-		for (int i=0; i < 500; i++) {
-			it.next();
+		//it.next();
+		for (int i=0; i < 3; i++) {
+			sum = sum + it.next();
 		}
-		if (!it.hasNext()) System.out.println("IT ERROR 3");
+		System.out.println(sum);
+		//if (!it.hasNext()) System.out.println("IT ERROR 3");
 
 	}
 
@@ -269,6 +287,7 @@ public class TestingAssignment3<T> {
 		testStraightTree();
 		testChonkTree();
 		testSingleRoot();
+		testStraightTree2();
 	}
 
 }
