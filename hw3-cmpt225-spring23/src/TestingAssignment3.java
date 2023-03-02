@@ -44,6 +44,14 @@ public class TestingAssignment3<T> {
 		return new BinaryTree<Integer>(node5);
 	}
 
+	// creating the tree
+	//       5
+	public static BinaryTree<Integer> createTree3() {
+		BTNode<Integer> node5 = new BTNode<Integer>(5, null, null, null);
+
+		return new BinaryTree<Integer>(node5);
+	}
+
 	// full tree depth 20 - approx 2,000,000 nodes
 	public static BTNode<Integer> createBigChonkNode(int d) {
 		BTNode<Integer> root = new BTNode<Integer>(d);
@@ -119,6 +127,7 @@ public class TestingAssignment3<T> {
 		try {
 			tree.distance(five, eleven);
 		} catch (IllegalArgumentException e) {
+			System.out.println("distance: caught node not in tree: illegal argument exception");
 		} catch (Exception e) {
 			System.out.println("distance: wrong exception");
 			return;
@@ -217,7 +226,36 @@ public class TestingAssignment3<T> {
 			System.out.println("Caught Illegal Argument for Big Chonk Tree");
 		}
 
+		Iterator<Integer> it = tree.preOrderIterator();
+		if (!it.hasNext()) System.out.println("IT ERROR 1");
+		it.next();
+		for (int i=0; i < 500; i++) {
+			it.next();
+		}
+		if (!it.hasNext()) System.out.println("IT ERROR 3");
 
+	}
+
+	public static void testSingleRoot() {
+		BinaryTree<Integer> tree = createTree3();
+
+		System.out.println("Number of leaves: " + tree.numberOfLeaves());
+		System.out.println("Depth Count: " + tree.countDepthK(0));
+		tree.map(x -> x * 2);
+
+		BTNode<Integer> eleven = new BTNode<Integer>(11);
+		try {
+			System.out.println("Distance ERROR" + tree.distance(eleven, tree.getRoot()));
+		} catch (IllegalArgumentException e) {
+			System.out.println("Caught Illegal Argument for Tree node no exist");
+		}
+
+		System.out.println("distane between root and root: " + tree.distance(tree.getRoot(), tree.getRoot()));
+
+		Iterator<Integer> it = tree.preOrderIterator();
+		if (!it.hasNext()) System.out.println("IT ERROR 1");
+		if (it.next() != 10) System.out.println("IT ERROR 2");
+		if (it.hasNext()) System.out.println("IT ERROR 3");
 	}
 
 	public static void main(String[] args) {
@@ -230,6 +268,7 @@ public class TestingAssignment3<T> {
 
 		testStraightTree();
 		testChonkTree();
+		testSingleRoot();
 	}
 
 }
