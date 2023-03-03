@@ -246,7 +246,7 @@ public class TestingAssignment3<T> {
 		Iterator<Integer> it = tree.preOrderIterator();
 		if (!it.hasNext()) System.out.println("IT ERROR 1");
 		//it.next();
-		for (int i=0; i < 3; i++) {
+		for (int i=0; i < 2100000; i++) {
 			sum = sum + it.next();
 		}
 		System.out.println(sum);

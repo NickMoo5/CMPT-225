@@ -53,7 +53,27 @@ public class BinaryTree<T> {
 	 */
 	public int numberOfLeaves() throws NullPointerException {
 		if (getRoot() == null) throw new NullPointerException();
-		return leafCount(getRoot());
+		Stack<BTNode<T>> s = new Stack<BTNode<T>>();
+		BTNode<T> node;
+		int count = 0;
+		s.push(getRoot());
+
+		while (!s.isEmpty()) {
+			node = s.pop();
+			if (node.getRightChild() == null && node.getLeftChild() == null) {
+				count++;
+			} else {
+				if (node.getLeftChild() != null) {
+					s.push(node.getLeftChild());
+				}
+				if (node.getRightChild() != null) {
+					s.push(node.getRightChild());
+				}
+			}
+
+		}
+		return count;
+		//return leafCount(getRoot());
 	}
 
 	private int depthCount(BTNode<T> node, int k) {
@@ -104,7 +124,8 @@ public class BinaryTree<T> {
 	}
 
 	private List<BTNode<T>> getPath(BTNode<T> node, List<BTNode<T>> path) {
-		BTNode<T> temp;
+		BTNode<T> temp = node;
+		/*
 		if (node == getRoot()) {
 			Collections.reverse(path);
 			return path;
@@ -115,11 +136,29 @@ public class BinaryTree<T> {
 			path.add(temp);
 			return getPath(temp, path);
 		}
+*/
+		if (node == getRoot()) {
+			Collections.reverse(path);
+			return path;
+		}
+
+		while (!temp.isRoot()) {
+			if (node.isRoot() && node != getRoot()) {
+				throw new IllegalArgumentException();
+			} else {
+				temp = temp.getParent();
+				path.add(temp);
+			}
+		}
+		Collections.reverse(path);
+		return path;
 	}
 
 	private BTNode<T> getCommonNode(BTNode<T> commonNode, BTNode<T> node1, BTNode<T> node2) {
 		if (commonNode == null) return null;
 		if (node1 == commonNode || node2 == commonNode) return commonNode;
+
+		Stack<BTNode<T>> s = new Stack<BTNode<T>>();
 
 		BTNode<T> leftNode = getCommonNode(commonNode.getLeftChild(), node1, node2);
 		BTNode<T> rightNode = getCommonNode(commonNode.getRightChild(), node1, node2);
