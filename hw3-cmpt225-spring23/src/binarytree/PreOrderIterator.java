@@ -5,38 +5,21 @@ import java.util.*;
 public class PreOrderIterator<T> implements Iterator<T> {
 
     private BTNode<T> root;
-
-    private ArrayList<BTNode<T>> nodes;
-    private int currIdx;
-
     private HashSet<BTNode<T>> processedNodes;
     private boolean rightTree;
 
     public PreOrderIterator(BTNode<T> rootOfTree) {
         root = rootOfTree;
-        nodes = new ArrayList<BTNode<T>>();
-        currIdx = 0;
         processedNodes = new HashSet<BTNode<T>>();
         rightTree = false;
     }
 
-    private void genPreOrder(BTNode<T> node) {
-        if (node == null) {return;}
-
-        nodes.add(node);
-        genPreOrder(node.getLeftChild());
-        genPreOrder(node.getRightChild());
-    }
-
-    private BTNode<T> gensPreOrder(BTNode<T> node) throws NoSuchElementException{
-        BTNode<T> temp = null;
+    private BTNode<T> genPreOrder(BTNode<T> node) throws NoSuchElementException{
         if (node == null) return null;
 
-        if (node.getParent() == null && node.getLeftChild() == null && node.getRightChild() == null &&
-                processedNodes.contains(node)) {
+        if (node.isLeaf() && node.isRoot() && processedNodes.contains(node)) {
             throw new NoSuchElementException();
-
-        } else if (node.getParent() == null && node.getLeftChild() == null && node.getRightChild() == null) {
+        } else if (node.isLeaf() && node.isRoot()) {
             processedNodes.add(node);
             return node;
         }
@@ -73,18 +56,12 @@ public class PreOrderIterator<T> implements Iterator<T> {
         return null;
     }
 
-
-
     @Override
     public boolean hasNext() {
         boolean rightTreeTemp = rightTree;
-        //nodes.clear();
-        //genPreOrder(root);
-        //return nodes.size() > currIdx;
 
         try {
-            //node = gensPreOrder(root);
-            processedNodes.remove(gensPreOrder(root));
+            processedNodes.remove(genPreOrder(root));
             rightTree = rightTreeTemp;
         } catch (NoSuchElementException e) {
             return false;
@@ -95,13 +72,9 @@ public class PreOrderIterator<T> implements Iterator<T> {
     @Override
     public T next() throws NoSuchElementException{
         if (!hasNext()) {throw new NoSuchElementException();}
-        //T retVal = nodes.get(currIdx).getData();
-        //currIdx++;
-        //return retVal;
 
-        root = gensPreOrder(root);
+        root = genPreOrder(root);
         return root.getData();
     }
 
-    public void reset() {currIdx = 0;}
 }

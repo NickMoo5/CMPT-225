@@ -39,14 +39,6 @@ public class BinaryTree<T> {
 
 	/**************** Assignment 3 *************************/
 
-	private int leafCount(BTNode<T> node) {
-		if (node == null) return 0;
-		if (node.getLeftChild() == null && node.getRightChild() == null) {
-			return 1;
-		} else {
-			return leafCount(node.getLeftChild()) + leafCount(node.getRightChild());
-		}
-	}
 
 	/**
 	 * returns the number of leaves in the tree
@@ -73,7 +65,6 @@ public class BinaryTree<T> {
 
 		}
 		return count;
-		//return leafCount(getRoot());
 	}
 
 	private int depthCount(BTNode<T> node, int k) {
@@ -93,18 +84,23 @@ public class BinaryTree<T> {
 		return depthCount(getRoot(), k);
 	}
 
-	private void applyMapper(BTNode<T> node, Function<? super T, ? extends T> mapper) {
-		if (node == null) {return;}
-
-		node.setData(mapper.apply(node.getData()));
-		applyMapper(node.getLeftChild(), mapper);
-		applyMapper(node.getRightChild(), mapper);
-	}
-
 	public void map(Function<? super T, ? extends T> mapper)  throws NullPointerException {
 		if (getRoot() == null) throw new NullPointerException();
 
-		applyMapper(getRoot(), mapper);
+		Stack<BTNode<T>> s = new Stack<BTNode<T>>();
+		BTNode<T> node;
+		s.push(getRoot());
+
+		while (!s.isEmpty()) {
+			node = s.pop();
+			node.setData(mapper.apply(node.getData()));
+			if (node.getLeftChild() != null) {
+				s.push(node.getLeftChild());
+			}
+			if (node.getRightChild() != null) {
+				s.push(node.getRightChild());
+			}
+		}
 	}
 
 	/**
@@ -123,20 +119,9 @@ public class BinaryTree<T> {
 		}
 	}
 
-	private List<BTNode<T>> getPath(BTNode<T> node, List<BTNode<T>> path) {
+	private List<BTNode<T>> getPath(BTNode<T> node, List<BTNode<T>> path) throws IllegalArgumentException{
 		BTNode<T> temp = node;
-		/*
-		if (node == getRoot()) {
-			Collections.reverse(path);
-			return path;
-		} else if (node.isRoot() && node != getRoot()) {
-			throw new IllegalArgumentException();
-		} else {
-			temp = node.getParent();
-			path.add(temp);
-			return getPath(temp, path);
-		}
-*/
+
 		if (node == getRoot()) {
 			Collections.reverse(path);
 			return path;
@@ -157,8 +142,6 @@ public class BinaryTree<T> {
 	private BTNode<T> getCommonNode(BTNode<T> commonNode, BTNode<T> node1, BTNode<T> node2) {
 		if (commonNode == null) return null;
 		if (node1 == commonNode || node2 == commonNode) return commonNode;
-
-		Stack<BTNode<T>> s = new Stack<BTNode<T>>();
 
 		BTNode<T> leftNode = getCommonNode(commonNode.getLeftChild(), node1, node2);
 		BTNode<T> rightNode = getCommonNode(commonNode.getRightChild(), node1, node2);

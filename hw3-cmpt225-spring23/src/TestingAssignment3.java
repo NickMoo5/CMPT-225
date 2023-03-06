@@ -66,6 +66,18 @@ public class TestingAssignment3<T> {
 		return new BinaryTree<Integer>(createBigChonkNode(25));
 	}
 
+	public static BinaryTree<Double> createStringTree() {
+		// A string of length 1,000,000
+		BTNode<Double> root = new BTNode<Double>(0.0);
+		BTNode<Double> cur = root;
+		for (int i = 1; i < 1000000; i++) {
+  			cur.setLeftChild(new BTNode<Double>((double)i*i));
+			cur = cur.getLeftChild();
+	 	}
+	 return new BinaryTree<Double>(root);
+	}
+
+
 	public static void testNumberOfLeaves() {
 		BinaryTree<Integer> tree = createTree();
 		if (tree.numberOfLeaves() == 4)
@@ -231,8 +243,8 @@ public class TestingAssignment3<T> {
 		BinaryTree<Integer> tree = createBigChonkTree();
 
 		System.out.println("Number of leaves: " + tree.numberOfLeaves());
-		System.out.println("Depth Count: " + tree.countDepthK(19));
-		//tree.map(x -> x * 2);
+		System.out.println("Depth Count: " + tree.countDepthK(20));
+		tree.map(x -> x * 2);
 
 		BTNode<Integer> eleven = new BTNode<Integer>(11);
 		BTNode<Integer> twelve = new BTNode<Integer>(12);
@@ -247,7 +259,9 @@ public class TestingAssignment3<T> {
 		if (!it.hasNext()) System.out.println("IT ERROR 1");
 		//it.next();
 		for (int i=0; i < 2100000; i++) {
-			sum = sum + it.next();
+			if (it.hasNext()) {
+				sum = sum + it.next();
+			}
 		}
 		System.out.println(sum);
 		//if (!it.hasNext()) System.out.println("IT ERROR 3");
@@ -276,7 +290,28 @@ public class TestingAssignment3<T> {
 		if (it.hasNext()) System.out.println("IT ERROR 3");
 	}
 
-	public static void main(String[] args) {
+	public static void testString() {
+		BinaryTree<Double> tree = createStringTree();
+
+		double sum = 0;
+		System.out.println("Number of leaves: " + tree.numberOfLeaves());
+		System.out.println("Depth Count: " + tree.countDepthK(20));
+		tree.map(x -> x * 2.0);
+
+		Iterator<Double> it = tree.preOrderIterator();
+		if (!it.hasNext()) System.out.println("IT ERROR 1");
+		//it.next();
+		for (int i=0; i < 1000000; i++) {
+			if (it.hasNext()) {
+				sum = sum + it.next();
+			}
+		}
+		System.out.println(sum);
+		//if (!it.hasNext()) System.out.println("IT ERROR 3");
+
+	}
+
+		public static void main(String[] args) {
 		testNumberOfLeaves();
 		testCountDepthK();
 		testMap();
@@ -288,6 +323,7 @@ public class TestingAssignment3<T> {
 		testChonkTree();
 		testSingleRoot();
 		testStraightTree2();
+		testString();
 	}
 
 }
