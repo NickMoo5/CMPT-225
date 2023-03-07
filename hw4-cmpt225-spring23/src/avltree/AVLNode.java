@@ -2,38 +2,55 @@ package avltree;
 
 public class AVLNode<T extends Comparable<T>> {
 
+	private T data;
+	private AVLNode<T> leftChild;
+	private AVLNode<T> rightChild;
+	private AVLNode<T> parent;
+
 	public AVLNode(T data) {
+		this.data = data;
+		this.leftChild = null;
+		this.rightChild = null;
+		this.parent = null;
 	}
 
 	public AVLNode(T data, AVLNode<T> left, AVLNode<T> right, AVLNode<T> parent) {
+		this.data = data;
+		this.leftChild = left;
+		this.rightChild = right;
+		this.parent = parent;
 	}
 
 	public T getData() {
-		return null;
+		return this.data;
 	}
 
 	public AVLNode<T> getLeftChild() {
-		return null;
+		return this.leftChild;
 	}
 
 	public AVLNode<T> getRightChild() {
-		return null;
+		return this.rightChild;
 	}
 
 	public AVLNode<T> getParent() {
-		return null;
+		return this.parent;
 	}
 
 	public void setData(T data) {
+		this.data = data;
 	}
 
 	public void setLeftChild(AVLNode<T> leftChild) {
+		this.leftChild = leftChild;
 	}
 
 	public void setRightChild(AVLNode<T> rightChild) {
+		this.rightChild = rightChild;
 	}
 
 	public void setParent(AVLNode<T> parent) {
+		this.parent = parent;
 	}
 	
 	public boolean isLeaf() {

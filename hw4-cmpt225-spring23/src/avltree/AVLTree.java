@@ -5,6 +5,9 @@ import java.util.*;
 public class AVLTree<T extends Comparable<T>> {
 
 	AVLNode<T> root;
+	private int height;
+	private int size;
+	private AVLNode<T> minElementNode;
 	
 	/**
 	 * creates an empty AVL tree
