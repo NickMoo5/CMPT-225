@@ -39,6 +39,9 @@ public class AVLNode<T extends Comparable<T>> {
 	public AVLNode<T> getParent() {
 		return this.parent;
 	}
+	public int getHeight() {
+		return this.height;
+	}
 
 	public void setData(T data) {
 		this.data = data;
@@ -54,6 +57,10 @@ public class AVLNode<T extends Comparable<T>> {
 
 	public void setParent(AVLNode<T> parent) {
 		this.parent = parent;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
 	}
 	
 	public boolean isLeaf() {
