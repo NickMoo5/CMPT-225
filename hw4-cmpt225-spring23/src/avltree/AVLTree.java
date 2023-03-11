@@ -28,7 +28,7 @@ public class AVLTree<T extends Comparable<T>> {
 	private int getBalance(AVLNode<T> node) {
 		if (node == null) {return 0;}
 
-		return node.getLeftChild().getHeight() - node.getRightChild().getHeight();
+		return height(node.getLeftChild()) - height(node.getRightChild());
 	}
 
 	private int max(int num1, int num2) {
@@ -48,8 +48,10 @@ public class AVLTree<T extends Comparable<T>> {
 		newRoot.setRightChild(node);
 		node.setLeftChild(tempNode);
 
-		tempNode.setParent(node);
+		if (tempNode != null) tempNode.setParent(node);
 		node.setParent(newRoot);
+
+		updateNodeHeights(node);
 
 		if (newRoot.isRoot()) {root = newRoot;}
 
@@ -64,8 +66,10 @@ public class AVLTree<T extends Comparable<T>> {
 		newRoot.setLeftChild(node);
 		node.setRightChild(tempNode);
 
-		tempNode.setParent(node);
+		if (tempNode != null) tempNode.setParent(node);
 		node.setParent(newRoot);
+
+		updateNodeHeights(node);
 
 		if (newRoot.isRoot()) {root = newRoot;}
 
@@ -80,7 +84,7 @@ public class AVLTree<T extends Comparable<T>> {
 		if (item == null) {return null;}
 		if (root == null) {
 			root = new AVLNode<T>(item);
-			root.setHeight(0);
+			root.setHeight(1);
 			return root;
 		}
 
@@ -92,36 +96,62 @@ public class AVLTree<T extends Comparable<T>> {
 			parentNode = curNode;
 			if (curNode.getData().compareTo(item) > 0) {
 				curNode = curNode.getLeftChild();
-			} else if (curNode.getData().compareTo(item) < 0) {
+			} else {
 				curNode = curNode.getRightChild();
 			}
 			nodeHeight++;
 		}
 
 		AVLNode<T> newNode = new AVLNode<T>(item);
+		newNode.setHeight(1);
+		newNode.setParent(parentNode);
 
 		if (parentNode.getData().compareTo(item) > 0) {
 			parentNode.setLeftChild(newNode);
-		} else if (curNode.getData().compareTo(item) < 0) {
+
+		} else if (parentNode.getData().compareTo(item) <= 0) {
 			parentNode.setRightChild(newNode);
+
 		}
-		newNode.setParent(parentNode);
-		updateNodeHeights(getRoot());
 
-		int balanceFactor = getBalance(newNode);
+		AVLNode<T> unbalancedNode = updateNodeHeights(newNode);
+		if (unbalancedNode != null) {
+			if (getBalance(unbalancedNode) > 1 && item.compareTo(unbalancedNode.getLeftChild().getData()) < 0) {
+				rightRotate(unbalancedNode);
+			}
+			if (getBalance(unbalancedNode) > 1 && item.compareTo(unbalancedNode.getLeftChild().getData()) > 0) {
+				//unbalancedNode.setLeftChild(leftRotate(unbalancedNode.getLeftChild()));
+				//rightRotate(unbalancedNode);
+				rightRotate((leftRotate(unbalancedNode.getLeftChild())).getParent());
+			}
 
+			if (getBalance(unbalancedNode) < -1 && item.compareTo(unbalancedNode.getRightChild().getData()) > 0) {
+				leftRotate(unbalancedNode);
+			}
+			if (getBalance(unbalancedNode) < -1 && item.compareTo(unbalancedNode.getRightChild().getData()) < 0) {
+				//unbalancedNode.setLeftChild(rightRotate(unbalancedNode.getRightChild()));
+				//rightRotate(leftRotate(unbalancedNode.getLeftChild()));
+				//leftRotate(unbalancedNode);
+				leftRotate(rightRotate(unbalancedNode.getRightChild()).getParent());
+			}
+			System.out.println(updateNodeHeights(unbalancedNode));
+		}
 
 		return null;
 	}
 
-	private int updateNodeHeights(AVLNode<T> node) {
-		if (node.isLeaf()) return 0;
-		node.setHeight(1 + max(updateNodeHeights(node.getLeftChild()), updateNodeHeights(node.getRightChild())));
-		return node.getHeight();
-	}
-
-	private AVLNode<T> balanceTree(AVLNode<T> node) {
-		if ()
+	private AVLNode<T> updateNodeHeights(AVLNode<T> node) {
+		AVLNode<T> retVal = null;
+		while (node != null) {
+			if (!node.isLeaf()) {
+				node.setHeight(1 + max(height(node.getLeftChild()), height(node.getRightChild())));
+				if (retVal == null) {
+					if (getBalance(node) > 1 || getBalance(node) < -1) retVal = node;
+				}
+			}
+			node = node.getParent();
+		}
+		return retVal;
 	}
 
 

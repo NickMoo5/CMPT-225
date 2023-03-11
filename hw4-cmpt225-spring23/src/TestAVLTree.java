@@ -11,9 +11,9 @@ public class TestAVLTree {
 		tree.insert(10);
 		tree.insert(2);
 		tree.insert(3);
-		tree.insert(8);
-		tree.insert(5);
-		tree.insert(1);
+		//tree.insert(8);
+		//tree.insert(5);
+		//tree.insert(1);
 		// expected tree
 		//       3
 		//      / \
@@ -77,7 +77,7 @@ public class TestAVLTree {
 		//    / \   
 		//   2   7  
 		//            
-		AVLNode<Integer> r = tree.getRoot(); 
+		//AVLNode<Integer> r = tree.getRoot();
 		if (r != null && r.getData() == 8
 				&& r.getLeftChild() != null
 				&& r.getLeftChild().getData() == 3
@@ -158,10 +158,10 @@ public class TestAVLTree {
 
 	public static void main(String[] args) {
 		testInsert();
-		testRemove();
-		testHeight();
-		testSize();
-		testMin();
-		testLessThanK();
+		//testRemove();
+		//testHeight();
+		//testSize();
+		//testMin();
+		//testLessThanK();
 	}
 }

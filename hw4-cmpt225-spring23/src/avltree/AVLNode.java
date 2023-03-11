@@ -13,7 +13,7 @@ public class AVLNode<T extends Comparable<T>> {
 		this.leftChild = null;
 		this.rightChild = null;
 		this.parent = null;
-		this.height = 0;
+		this.height = 1;
 	}
 
 	public AVLNode(T data, AVLNode<T> left, AVLNode<T> right, AVLNode<T> parent) {
@@ -21,7 +21,7 @@ public class AVLNode<T extends Comparable<T>> {
 		this.leftChild = left;
 		this.rightChild = right;
 		this.parent = parent;
-		this.height = 0;
+		this.height = 1;
 	}
 
 	public T getData() {
