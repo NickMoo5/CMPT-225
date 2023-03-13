@@ -11,9 +11,9 @@ public class TestAVLTree {
 		tree.insert(10);
 		tree.insert(2);
 		tree.insert(3);
-		//tree.insert(8);
-		//tree.insert(5);
-		//tree.insert(1);
+		tree.insert(8);
+		tree.insert(5);
+		tree.insert(1);
 		// expected tree
 		//       3
 		//      / \
@@ -30,7 +30,6 @@ public class TestAVLTree {
 			System.out.println("testInsert OK");
 		else
 			System.out.println("testInsert ERROR");
-
 	}
 
 
@@ -96,7 +95,7 @@ public class TestAVLTree {
 		if (tree.height()==9)
 			System.out.println("testHeight OK");
 		else
-			System.out.println("testHeight ERROR");
+			System.out.println("testHeight ERROR: " + tree.height());
 	}
 
 	
@@ -154,12 +153,11 @@ public class TestAVLTree {
 		else
 			System.out.println("testLessThanK 2 ERROR");
 	}
-	
 
 	public static void main(String[] args) {
 		testInsert();
 		//testRemove();
-		//testHeight();
+		testHeight();
 		//testSize();
 		//testMin();
 		//testLessThanK();

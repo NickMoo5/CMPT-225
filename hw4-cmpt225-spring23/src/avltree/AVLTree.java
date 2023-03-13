@@ -45,11 +45,21 @@ public class AVLTree<T extends Comparable<T>> {
 		AVLNode<T> tempNode = newRoot.getRightChild();
 
 		newRoot.setParent(node.getParent());
+
+		if (!node.isRoot() && node.getData().compareTo(node.getParent().getData()) < 0) {
+			node.getParent().setLeftChild(newRoot);
+		} else if (!node.isRoot()){
+			node.getParent().setRightChild(newRoot);
+		}
+
 		newRoot.setRightChild(node);
 		node.setLeftChild(tempNode);
 
 		if (tempNode != null) tempNode.setParent(node);
 		node.setParent(newRoot);
+
+		//node.setHeight(max(height(node.getLeftChild()), height(node.getRightChild())) + 1);
+		//newRoot.setHeight(max(height(newRoot.getLeftChild()), height(newRoot.getRightChild())) + 1);
 
 		updateNodeHeights(node);
 
@@ -63,11 +73,21 @@ public class AVLTree<T extends Comparable<T>> {
 		AVLNode<T> tempNode = newRoot.getLeftChild();
 
 		newRoot.setParent(node.getParent());
+		//if (!node.isRoot()) node.getParent().setLeftChild(newRoot);
+		if (!node.isRoot() && node.getData().compareTo(node.getParent().getData()) < 0) {
+			node.getParent().setLeftChild(newRoot);
+		} else if (!node.isRoot()){
+			node.getParent().setRightChild(newRoot);
+		}
+
 		newRoot.setLeftChild(node);
 		node.setRightChild(tempNode);
 
 		if (tempNode != null) tempNode.setParent(node);
 		node.setParent(newRoot);
+
+		//node.setHeight(max(height(node.getLeftChild()), height(node.getRightChild())) + 1);
+		//newRoot.setHeight(max(height(newRoot.getLeftChild()), height(newRoot.getRightChild())) + 1);
 
 		updateNodeHeights(node);
 
@@ -81,16 +101,16 @@ public class AVLTree<T extends Comparable<T>> {
 	 * duplicates are allowed
 	 */
 	public AVLNode<T> insert(T item) {
-		if (item == null) {return null;}
 		if (root == null) {
 			root = new AVLNode<T>(item);
 			root.setHeight(1);
+			size++;
+			updateMinElementNode();
 			return root;
 		}
 
 		AVLNode<T> curNode = getRoot();
 		AVLNode<T> parentNode = null;
-		int nodeHeight = 0;
 
 		while (curNode != null) {
 			parentNode = curNode;
@@ -99,7 +119,6 @@ public class AVLTree<T extends Comparable<T>> {
 			} else {
 				curNode = curNode.getRightChild();
 			}
-			nodeHeight++;
 		}
 
 		AVLNode<T> newNode = new AVLNode<T>(item);
@@ -111,63 +130,111 @@ public class AVLTree<T extends Comparable<T>> {
 
 		} else if (parentNode.getData().compareTo(item) <= 0) {
 			parentNode.setRightChild(newNode);
-
 		}
 
-		AVLNode<T> unbalancedNode = updateNodeHeights(newNode);
+		size++;
+
+		//AVLNode<T> unbalancedNode = updateNodeHeights(newNode);
+/*
+		while (unbalancedNode != null) {
+			AVLNode<T> node = balanceTree(unbalancedNode, item);
+			unbalancedNode = updateNodeHeights(node);
+		}
+		*/
+
+		balanceTree(newNode, item);
+
+		updateMinElementNode();
+
+		return null;
+	}
+
+	private AVLNode<T> balanceTree(AVLNode<T> node, T item) {
+		AVLNode<T> unbalancedNode = updateNodeHeights(node);
 		if (unbalancedNode != null) {
 			if (getBalance(unbalancedNode) > 1 && item.compareTo(unbalancedNode.getLeftChild().getData()) < 0) {
-				rightRotate(unbalancedNode);
+				return rightRotate(unbalancedNode);
 			}
 			if (getBalance(unbalancedNode) > 1 && item.compareTo(unbalancedNode.getLeftChild().getData()) > 0) {
 				//unbalancedNode.setLeftChild(leftRotate(unbalancedNode.getLeftChild()));
 				//rightRotate(unbalancedNode);
-				rightRotate((leftRotate(unbalancedNode.getLeftChild())).getParent());
+				return rightRotate((leftRotate(unbalancedNode.getLeftChild())).getParent());
 			}
 
 			if (getBalance(unbalancedNode) < -1 && item.compareTo(unbalancedNode.getRightChild().getData()) > 0) {
-				leftRotate(unbalancedNode);
+				return leftRotate(unbalancedNode);
 			}
 			if (getBalance(unbalancedNode) < -1 && item.compareTo(unbalancedNode.getRightChild().getData()) < 0) {
 				//unbalancedNode.setLeftChild(rightRotate(unbalancedNode.getRightChild()));
 				//rightRotate(leftRotate(unbalancedNode.getLeftChild()));
 				//leftRotate(unbalancedNode);
-				leftRotate(rightRotate(unbalancedNode.getRightChild()).getParent());
+				return leftRotate(rightRotate(unbalancedNode.getRightChild()).getParent());
 			}
-			System.out.println(updateNodeHeights(unbalancedNode));
 		}
-
-		return null;
+		return node;
 	}
 
 	private AVLNode<T> updateNodeHeights(AVLNode<T> node) {
 		AVLNode<T> retVal = null;
 		while (node != null) {
-			if (!node.isLeaf()) {
-				node.setHeight(1 + max(height(node.getLeftChild()), height(node.getRightChild())));
-				if (retVal == null) {
-					if (getBalance(node) > 1 || getBalance(node) < -1) retVal = node;
-				}
-			}
+			node.setHeight(1 + (max(height(node.getLeftChild()), height(node.getRightChild()))));
+
+			if (getBalance(node) > 1 || getBalance(node) < -1 && retVal == null) retVal = node;
+
 			node = node.getParent();
 		}
 		return retVal;
 	}
 
+	private void updateMinElementNode() {
+		AVLNode<T> node = getRoot();
+		while(!node.isLeaf() && node.getLeftChild() != null) {
+			node = node.getLeftChild();
+		}
+		minElementNode = node;
+	}
 
 	/**
 	 * remove item from the AVL tree
 	 * if item is not in the tree, throws NoSuchElementException
 	 */
 	public void remove(T item) {
-		// TODO implement me
+		if (root == null) {
+			root = new AVLNode<T>(item);
+			root.setHeight(1);
+		}
+
+		AVLNode<T> curNode = getRoot();
+		AVLNode<T> parentNode = null;
+
+		while (curNode != null) {
+			parentNode = curNode;
+			if (curNode.getData().compareTo(item) > 0) {
+				curNode = curNode.getLeftChild();
+			} else {
+				curNode = curNode.getRightChild();
+			}
+		}
+
+		AVLNode<T> newNode = new AVLNode<T>(item);
+		newNode.setHeight(1);
+		newNode.setParent(parentNode);
+
+		if (parentNode.getData().compareTo(item) > 0) {
+			parentNode.setLeftChild(newNode);
+
+		} else if (parentNode.getData().compareTo(item) <= 0) {
+			parentNode.setRightChild(newNode);
+		}
+
+		balanceTree(newNode, item);
 	}
 
 	/**
 	 * returns the height of the tree in O(1) time
 	 */
 	public int height() {
-		return height;
+		return root.getHeight() - 1;
 	}
 
 	/**
@@ -190,7 +257,17 @@ public class AVLTree<T extends Comparable<T>> {
 	 * If the list is empty, returns an empty list 
 	 */
 	public Collection<T> lessThanK(T k) {
-		// TODO implement me
+		ArrayList<T> ret = new ArrayList<T>();
+		AVLNode<T> curNode = getRoot();
+		while (curNode.getData().compareTo(k) >= 0) {
+			curNode = curNode.getLeftChild();
+		}
+
+		while (curNode != null) {
+			ret.add(curNode.getData());
+			curNode = curNode.getParent();
+		}
+
 		return null;
 	}
 
