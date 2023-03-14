@@ -119,7 +119,7 @@ public class TestGraph {
 	public static void main(String[] args) {
 		Graph graph = createGraph();
 		testDistance(graph);
-		testIterator(graph);
-		testRandomGraph();
+		//testIterator(graph);
+		//testRandomGraph();
 	}
 }

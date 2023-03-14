@@ -1,18 +1,26 @@
 package graph;
 
-import java.util.Iterator;
+import java.util.*;
 
 public class Graph {
-
+	private Map<Integer, ArrayList<Integer>> graph = new HashMap<>();
+	private int edges = 0;
 	/**
 	 * creates an empty graph on n nodes
 	 * the "names" of the vertices are 0,1,..,n-1 
 	 * @param n - number of vertices in the graph
 	 */
 	public Graph(int n) {
-		// TODO implement me
+		if (n < 0) throw new IllegalArgumentException();
+
+		for (int i = 0; i < n; i++) {
+			addVertex(i);
+		}
 	}
 
+	private void addVertex(int n) {
+		graph.put(n, new ArrayList<Integer>());
+	}
 
 	/**
 	 * adds the edge (i,j) to the graph  
@@ -20,7 +28,15 @@ public class Graph {
 	 * @param i, j - vertices in the graph
 	 */
 	public void addEdge(int i, int j) {
-		// TODO implement me
+		if (!graph.containsKey(i) || !graph.containsKey(j)) {
+			throw new NoSuchElementException();
+		}
+
+		if (!graph.get(i).contains(j) && !graph.get(j).contains(i)) {
+			graph.get(i).add(j);
+			graph.get(j).add(i);
+			edges++;
+		}
 	}
 
 	/**
@@ -29,7 +45,14 @@ public class Graph {
 	 * @param i, j - vertices in the graph
 	 */
 	public void removeEdge(int i, int j) {
-		// TODO implement me
+		if (!graph.containsKey(i) || !graph.containsKey(j)) {
+			throw new NoSuchElementException();
+		}
+		if (graph.get(i).contains(j) && graph.get(j).contains(i)) {
+			graph.get(i).remove(Integer.valueOf(j));
+			graph.get(j).remove(Integer.valueOf(i));
+			edges--;
+		}
 	}
 
 	/**
@@ -37,7 +60,9 @@ public class Graph {
 	 * @return true if (i,j) is an edge in the graph, and false otherwise
 	 */
 	public boolean areAdjacent(int i, int j) {
-		// TODO implement me
+		if (graph.get(i).contains(j) && graph.get(j).contains(i)) {
+			return true;
+		}
 		return false;
 	}
 
@@ -47,7 +72,14 @@ public class Graph {
 	 * @return true if distance(i,j)<=2, and false otherwise
 	 */
 	public boolean distanceAtMost2(int i, int j) {
-		// TODO implement me
+		if (areAdjacent(i, j)) {
+			return true;
+		}
+		for (int vertex: graph.get(i)) {
+			if (graph.get(j).contains(Integer.valueOf(vertex))) {
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -56,8 +88,7 @@ public class Graph {
 	 * @return the degree of i
 	 */
 	public int degree(int i) {
-		// TODO implement me
-		return 0;
+		return graph.get(i).size();
 	}
 	
 	/**
@@ -75,16 +106,14 @@ public class Graph {
 	 * @return number of vertices in the graph
 	 */
 	public int numberOfVertices() {
-		// TODO implement me
-		return 0;
+		return graph.size();
 	}
 
 	/**
 	 * @return number of edges in the graph
 	 */
 	public int numberOfEdges() {
-		// TODO implement me
-		return 0;
+		return edges;
 	}
 
 	/**
