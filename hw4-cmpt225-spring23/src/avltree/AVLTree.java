@@ -134,14 +134,6 @@ public class AVLTree<T extends Comparable<T>> {
 
 		size++;
 
-		//AVLNode<T> unbalancedNode = updateNodeHeights(newNode);
-/*
-		while (unbalancedNode != null) {
-			AVLNode<T> node = balanceTree(unbalancedNode, item);
-			unbalancedNode = updateNodeHeights(node);
-		}
-		*/
-
 		balanceTree(newNode, item);
 
 		updateMinElementNode();
@@ -194,40 +186,53 @@ public class AVLTree<T extends Comparable<T>> {
 		minElementNode = node;
 	}
 
+	private T getMinValInTree(AVLNode<T> node) {
+		while (node.getLeftChild() != null) {
+			node = node.getLeftChild();
+		}
+		return node.getData();
+	}
+
 	/**
 	 * remove item from the AVL tree
 	 * if item is not in the tree, throws NoSuchElementException
 	 */
-	public void remove(T item) {
-		if (root == null) {
-			root = new AVLNode<T>(item);
-			root.setHeight(1);
-		}
+	public void remove(T item) throws NullPointerException, NoSuchElementException {
+		if (getRoot() == null) throw new NullPointerException();
 
 		AVLNode<T> curNode = getRoot();
-		AVLNode<T> parentNode = null;
 
-		while (curNode != null) {
-			parentNode = curNode;
+		while (curNode.getData() != item) {
 			if (curNode.getData().compareTo(item) > 0) {
 				curNode = curNode.getLeftChild();
 			} else {
 				curNode = curNode.getRightChild();
 			}
+			if (curNode == null) throw new NoSuchElementException();
 		}
 
-		AVLNode<T> newNode = new AVLNode<T>(item);
-		newNode.setHeight(1);
-		newNode.setParent(parentNode);
+		if (curNode.isRoot()) {
+			root = null;
+		} else if (curNode.getLeftChild() != null && curNode.getRightChild() != null) {
+			T minValInTree = getMinValInTree(curNode);
+			remove(minValInTree);
+			curNode.setData(minValInTree);
+		} else {    // if leaf or 1 child
+			AVLNode<T> newChildNode = null;
 
-		if (parentNode.getData().compareTo(item) > 0) {
-			parentNode.setLeftChild(newNode);
+			if (curNode.getLeftChild() == null && curNode.getRightChild() != null) {
+				newChildNode = curNode.getRightChild();
+			} else if (curNode.getLeftChild() == null && curNode.getRightChild() != null) {
+				newChildNode = curNode.getLeftChild();
+			}
 
-		} else if (parentNode.getData().compareTo(item) <= 0) {
-			parentNode.setRightChild(newNode);
+			if (curNode.getData().compareTo(curNode.getParent().getData()) > 0) {
+				curNode.getParent().setLeftChild(newChildNode);
+			} else {
+				curNode.getParent().setRightChild(newChildNode);
+			}
 		}
-
-		balanceTree(newNode, item);
+		
 	}
 
 	/**
