@@ -1,9 +1,14 @@
 package graph;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.NoSuchElementException;
 
 public class Graph {
-	private Map<Integer, ArrayList<Integer>> graph = new HashMap<>();
+	private Map<Integer, List<Integer>> graph = new HashMap<>();
 	private int edges = 0;
 	/**
 	 * creates an empty graph on n nodes
@@ -27,10 +32,11 @@ public class Graph {
 	 * no effect if i and j were already adjacent
 	 * @param i, j - vertices in the graph
 	 */
-	public void addEdge(int i, int j) {
+	public void addEdge(int i, int j) throws NoSuchElementException, IllegalArgumentException {
 		if (!graph.containsKey(i) || !graph.containsKey(j)) {
 			throw new NoSuchElementException();
 		}
+		if (i == j) throw new IllegalArgumentException();
 
 		if (!graph.get(i).contains(j) && !graph.get(j).contains(i)) {
 			graph.get(i).add(j);
@@ -44,7 +50,7 @@ public class Graph {
 	 * no effect if i and j were not adjacent
 	 * @param i, j - vertices in the graph
 	 */
-	public void removeEdge(int i, int j) {
+	public void removeEdge(int i, int j) throws NoSuchElementException {
 		if (!graph.containsKey(i) || !graph.containsKey(j)) {
 			throw new NoSuchElementException();
 		}
@@ -87,7 +93,8 @@ public class Graph {
 	 * @param i - a vertex in the graph
 	 * @return the degree of i
 	 */
-	public int degree(int i) {
+	public int degree(int i) throws NoSuchElementException {
+		if (!graph.containsKey(i)) throw new NoSuchElementException();
 		return graph.get(i).size();
 	}
 	
@@ -97,9 +104,9 @@ public class Graph {
 	 * @param i - a vertex in the graph
 	 * @return an iterator that returns the neighbors of i
 	 */
-	public Iterator<Integer> neighboursIterator(int i) {
-		// TODO implement me
-		return null;
+	public Iterator<Integer> neighboursIterator(int i) throws NoSuchElementException {
+		if (!graph.containsKey(i)) throw new NoSuchElementException();
+		return new graphIterator<Integer>(graph.get(i));
 	}
 
 	/**
@@ -122,8 +129,16 @@ public class Graph {
 	 * @return a random graph on n vertices, where each edge is added to the graph with probability p
 	 */
 	public static Graph generateRandomGraph(int n, double p) {
-		// TODO Auto-generated method stub
-		return null;
+		Graph randGraph = new Graph(n);
+
+		for (int i = 0; i < n; i++) {
+			for (int j = i; j < n; j++) {
+				if (Math.random() < p && j != i) {
+					randGraph.addEdge(i, j);
+				}
+			}
+		}
+		return randGraph;
 	}
 
 }

@@ -5,7 +5,6 @@ import java.util.*;
 public class AVLTree<T extends Comparable<T>> {
 
 	AVLNode<T> root;
-	private int height;
 	private int size;
 	private AVLNode<T> minElementNode;
 	
@@ -20,9 +19,17 @@ public class AVLTree<T extends Comparable<T>> {
 	 * returns a node containing item in the AVL tree
 	 * if item is not in the tree, throws NoSuchElementException
 	 */
-	public AVLNode<T> find(T item) {
-		// TODO implement me
-		return null;
+	public AVLNode<T> find(T item) throws NoSuchElementException {
+		AVLNode<T> curNode = getRoot();
+		while (curNode.getData().compareTo(item) != 0 || curNode != null) {
+			if (curNode.getData().compareTo(item) > 0) {
+				curNode = curNode.getLeftChild();
+			} else {
+				curNode = curNode.getRightChild();
+			}
+		}
+		if (curNode == null) throw new NoSuchElementException();
+		return curNode;
 	}
 
 	private int getBalance(AVLNode<T> node) {
@@ -262,7 +269,7 @@ public class AVLTree<T extends Comparable<T>> {
 	 * If the list is empty, returns an empty list 
 	 */
 	public Collection<T> lessThanK(T k) {
-		ArrayList<T> ret = new ArrayList<T>();
+		Collection<T> ret = new ArrayList<T>();
 		AVLNode<T> curNode = getRoot();
 		while (curNode.getData().compareTo(k) >= 0) {
 			curNode = curNode.getLeftChild();
@@ -270,10 +277,10 @@ public class AVLTree<T extends Comparable<T>> {
 
 		while (curNode != null) {
 			ret.add(curNode.getData());
-			curNode = curNode.getParent();
+			curNode = curNode.getLeftChild();
 		}
 
-		return null;
+		return ret;
 	}
 
 	public AVLNode<T> getRoot() {

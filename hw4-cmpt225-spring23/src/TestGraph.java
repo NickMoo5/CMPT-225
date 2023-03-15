@@ -82,7 +82,6 @@ public class TestGraph {
 			System.out.println("testIterator fail");
 	}
 
-
 	public static void testRandomGraph() {
 		int n = 100;
 		Graph randomGraph = Graph.generateRandomGraph(100, 0.5);
@@ -119,7 +118,7 @@ public class TestGraph {
 	public static void main(String[] args) {
 		Graph graph = createGraph();
 		testDistance(graph);
-		//testIterator(graph);
-		//testRandomGraph();
+		testIterator(graph);
+		testRandomGraph();
 	}
 }
