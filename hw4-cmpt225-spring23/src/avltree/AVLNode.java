@@ -71,4 +71,13 @@ public class AVLNode<T extends Comparable<T>> {
 		return (getParent() == null);
 	}
 
+	public void printPreOrder() {
+		System.out.println(this.data);
+
+		if (leftChild != null)
+			leftChild.printPreOrder();
+
+		if (rightChild != null)
+			rightChild.printPreOrder();
+	}
 }

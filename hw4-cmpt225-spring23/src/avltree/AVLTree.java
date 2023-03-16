@@ -141,7 +141,8 @@ public class AVLTree<T extends Comparable<T>> {
 
 		size++;
 
-		balanceTree(newNode, item);
+		//balanceTree(newNode, item);
+		balanceTrees(newNode);
 
 		updateMinElementNode();
 
@@ -173,6 +174,31 @@ public class AVLTree<T extends Comparable<T>> {
 		return node;
 	}
 
+	private AVLNode<T> balanceTrees(AVLNode<T> node) {
+		AVLNode<T> unbalancedNode = updateNodeHeights(node);
+		if (unbalancedNode != null) {
+			if (getBalance(unbalancedNode) > 1 && getBalance(unbalancedNode.getLeftChild()) >= 0) {
+				return rightRotate(unbalancedNode);
+			}
+			if (getBalance(unbalancedNode) > 1 && getBalance(unbalancedNode.getLeftChild()) < 0) {
+				//unbalancedNode.setLeftChild(leftRotate(unbalancedNode.getLeftChild()));
+				//rightRotate(unbalancedNode);
+				return rightRotate((leftRotate(unbalancedNode.getLeftChild())).getParent());
+			}
+
+			if (getBalance(unbalancedNode) < -1 && getBalance(unbalancedNode.getRightChild()) <= 0) {
+				return leftRotate(unbalancedNode);
+			}
+			if (getBalance(unbalancedNode) < -1 && getBalance(unbalancedNode.getRightChild()) > 0) {
+				//unbalancedNode.setLeftChild(rightRotate(unbalancedNode.getRightChild()));
+				//rightRotate(leftRotate(unbalancedNode.getLeftChild()));
+				//leftRotate(unbalancedNode);
+				return leftRotate(rightRotate(unbalancedNode.getRightChild()).getParent());
+			}
+		}
+		return node;
+	}
+
 	private AVLNode<T> updateNodeHeights(AVLNode<T> node) {
 		AVLNode<T> retVal = null;
 		while (node != null) {
@@ -193,11 +219,17 @@ public class AVLTree<T extends Comparable<T>> {
 		minElementNode = node;
 	}
 
-	private T getMinValInTree(AVLNode<T> node) {
+	private AVLNode<T> getMinNodeInTree(AVLNode<T> node) {
+		/*
 		while (node.getLeftChild() != null) {
 			node = node.getLeftChild();
 		}
-		return node.getData();
+		return node; */
+
+		while (node.getRightChild() != null) {
+			node = node.getRightChild();
+		}
+		return node;
 	}
 
 	/**
@@ -208,8 +240,9 @@ public class AVLTree<T extends Comparable<T>> {
 		if (getRoot() == null) throw new NullPointerException();
 
 		AVLNode<T> curNode = getRoot();
+		AVLNode<T> unbalancedNode = null;
 
-		while (curNode.getData() != item) {
+		while (curNode.getData().compareTo(item) != 0) {
 			if (curNode.getData().compareTo(item) > 0) {
 				curNode = curNode.getLeftChild();
 			} else {
@@ -218,14 +251,28 @@ public class AVLTree<T extends Comparable<T>> {
 			if (curNode == null) throw new NoSuchElementException();
 		}
 
-		if (curNode.isRoot()) {
-			root = null;
-		} else if (curNode.getLeftChild() != null && curNode.getRightChild() != null) {
-			T minValInTree = getMinValInTree(curNode);
-			remove(minValInTree);
-			curNode.setData(minValInTree);
+
+		if (curNode.getLeftChild() != null && curNode.getRightChild() != null) {
+			AVLNode minNodeInTree = getMinNodeInTree(curNode.getLeftChild());
+			T minData = (T) minNodeInTree.getData();
+
+			// -------------------------
+			if (minNodeInTree.getData().compareTo(minNodeInTree.getParent().getData()) < 0) {
+				minNodeInTree.getParent().setLeftChild(null);
+			} else {
+				minNodeInTree.getParent().setRightChild(null);
+			}
+			balanceTrees(minNodeInTree.getParent());
+			// -------------------------
+
+
+			//unbalancedNode = minNodeInTree.getParent();
+			//remove(minData);
+			curNode.setData(minData);
+			//unbalancedNode = null;
 		} else {    // if leaf or 1 child
 			AVLNode<T> newChildNode = null;
+			unbalancedNode = curNode.getParent();
 
 			if (curNode.getLeftChild() == null && curNode.getRightChild() != null) {
 				newChildNode = curNode.getRightChild();
@@ -233,12 +280,23 @@ public class AVLTree<T extends Comparable<T>> {
 				newChildNode = curNode.getLeftChild();
 			}
 
-			if (curNode.getData().compareTo(curNode.getParent().getData()) > 0) {
+			if (curNode.getData().compareTo(curNode.getParent().getData()) < 0) {
 				curNode.getParent().setLeftChild(newChildNode);
 			} else {
 				curNode.getParent().setRightChild(newChildNode);
 			}
+
+			if (newChildNode != null) newChildNode.setParent(curNode.getParent());
+
 		}
+
+		size--;
+
+		if (unbalancedNode != null) {
+			balanceTrees(unbalancedNode);
+		}
+
+		updateMinElementNode();
 		
 	}
 

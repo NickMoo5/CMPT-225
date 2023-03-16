@@ -103,8 +103,10 @@ public class TestAVLTree {
 		AVLTree<Integer> tree = new AVLTree<Integer>();
 		for (int i = 0; i < 1000; i++)
 			tree.insert(i);
-		for (int i = 20; i < 520; i++)
+		for (int i = 20; i < 520; i++) {
+			System.out.println(i);
 			tree.remove(i);
+		}
 		if (tree.size()==500)
 			System.out.println("testSize OK");
 		else
@@ -138,8 +140,10 @@ public class TestAVLTree {
 		AVLTree<Integer> tree = new AVLTree<Integer>();
 		for (int i = 0; i < 1000; i++)
 			tree.insert(i);
-		for (int i = 20; i < 520; i++)
+		for (int i = 20; i < 520; i++) {
+			System.out.println(i);
 			tree.remove(i);
+		}
 
 		Collection<Integer> list1 = tree.lessThanK(30);
 		if (list1.size()==20)
@@ -154,12 +158,46 @@ public class TestAVLTree {
 			System.out.println("testLessThanK 2 ERROR");
 	}
 
+	public static void testDoubleRemove() {
+		AVLTree<Integer> tree = new AVLTree<Integer>();
+		for (int i = 0; i < 130; i++)
+			tree.insert(i);
+		AVLNode<Integer> r = tree.getRoot();
+		r.printPreOrder();
+
+		for (int i = 128; i < 129; i++) {
+			//System.out.println(i);
+			tree.remove(i);
+		}
+		System.out.println("---------------" + tree.size());
+		r = tree.getRoot();
+		//r.printPreOrder();
+
+		//if (r.getData() != 1) System.out.println("BAD1");
+
+	}
+
+	public static void testRemoveMore() {
+		AVLTree<Integer> tree = new AVLTree<Integer>();
+		tree.insert(35);
+		tree.insert(25);
+		tree.insert(40);
+		tree.insert(39);
+		tree.insert(41);
+		tree.insert(23);
+		tree.insert(37);
+		tree.insert(26);
+		tree.insert(27);
+		tree.remove(25);
+	}
+
 	public static void main(String[] args) {
-		testInsert();
-		//testRemove();
-		testHeight();
-		//testSize();
+		//testInsert();
+		testRemove();
+		//testHeight();
+		testSize();
 		//testMin();
 		//testLessThanK();
+		//testDoubleRemove();
 	}
 }
