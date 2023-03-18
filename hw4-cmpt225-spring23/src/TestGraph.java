@@ -48,6 +48,18 @@ public class TestGraph {
 		else
 			System.out.println("test create 3 fail");
 
+		if (graph.numberOfVertices() == 8) {
+			System.out.println("test create 4 ok");
+		} else {
+			System.out.println("test create 4 fail");
+		}
+
+		if (graph.numberOfEdges() == 14) {
+			System.out.println("test create 5 ok");
+		} else {
+			System.out.println("test create 5 fail");
+		}
+
 		return graph;
 	}
 

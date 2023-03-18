@@ -1,5 +1,6 @@
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import avltree.AVLNode;
 import avltree.AVLTree;
@@ -104,7 +105,6 @@ public class TestAVLTree {
 		for (int i = 0; i < 1000; i++)
 			tree.insert(i);
 		for (int i = 20; i < 520; i++) {
-			System.out.println(i);
 			tree.remove(i);
 		}
 		if (tree.size()==500)
@@ -141,40 +141,81 @@ public class TestAVLTree {
 		for (int i = 0; i < 1000; i++)
 			tree.insert(i);
 		for (int i = 20; i < 520; i++) {
-			System.out.println(i);
 			tree.remove(i);
 		}
 
 		Collection<Integer> list1 = tree.lessThanK(30);
 		if (list1.size()==20)
-			System.out.println("testLessThanK 1 OK");
+			System.out.println("testLessThanK 1 OK"+ tree.lessThanK(30));
 		else
-			System.out.println("testLessThanK 1 ERROR");
+			System.out.println("testLessThanK 1 ERROR" + tree.lessThanK(30));
 		
 		Collection<Integer> list2 = tree.lessThanK(525);
 		if (list2.size()==25)
-			System.out.println("testLessThanK 2 OK");
+			System.out.println("testLessThanK 2 OK"+ tree.lessThanK(525));
 		else
-			System.out.println("testLessThanK 2 ERROR");
+			System.out.println("testLessThanK 2 ERROR"+ tree.lessThanK(525));
+
+		Collection<Integer> list3 = tree.lessThanK(950);
+		if (list3.size()==450)
+			System.out.println("testLessThanK 3 OK");
+		else
+			System.out.println("testLessThanK 3 ERROR");
+
+		if (tree.find(842).getData().compareTo(842) == 0) {
+			System.out.println("test find in K ok");
+		} else {
+			System.out.println("test find in K error");
+		}
+
+		try {
+			if (tree.find(449).getData().compareTo(449) != 0) {
+				System.out.println("test find in K2 error");
+			} else {
+				System.out.println("test find in K2 error");
+			}
+		} catch (NoSuchElementException e) {
+			System.out.println("test find in K2 ok");
+		}
 	}
 
 	public static void testDoubleRemove() {
 		AVLTree<Integer> tree = new AVLTree<Integer>();
-		for (int i = 0; i < 130; i++)
-			tree.insert(i);
-		AVLNode<Integer> r = tree.getRoot();
-		r.printPreOrder();
 
-		for (int i = 128; i < 129; i++) {
-			//System.out.println(i);
-			tree.remove(i);
+		tree.insert(10);
+		tree.insert(15);
+		tree.insert(3);
+		tree.insert(20);
+		tree.insert(20);
+		tree.insert(3);
+		tree.insert(1);
+		tree.getRoot().printPreOrder();
+		System.out.println("---------------");
+		tree.remove(20);
+		tree.remove(10);
+		tree.remove(3);
+		tree.insert(15);
+		tree.remove(15);
+		tree.remove(20);
+		tree.insert(10);
+		tree.insert(15);
+		tree.remove(15);
+
+		tree.getRoot().printPreOrder();
+		try {
+			if (tree.find(20).getData().compareTo(20) != 0) {
+				System.out.println("test find 1 error");
+			} else {
+				System.out.println("test find 1 error");
+			}
+		} catch (NoSuchElementException e) {
+			System.out.println("test find 1 ok");
 		}
-		System.out.println("---------------" + tree.size());
-		r = tree.getRoot();
-		//r.printPreOrder();
-
-		//if (r.getData() != 1) System.out.println("BAD1");
-
+		if (tree.find(3).getData().compareTo(3) == 0) {
+			System.out.println("test find 2 ok");
+		} else {
+			System.out.println("test find 2 error");
+		}
 	}
 
 	public static void testRemoveMore() {
@@ -192,12 +233,12 @@ public class TestAVLTree {
 	}
 
 	public static void main(String[] args) {
-		//testInsert();
+		testInsert();
 		testRemove();
-		//testHeight();
+		testHeight();
 		testSize();
-		//testMin();
-		//testLessThanK();
-		//testDoubleRemove();
+		testMin();
+		testLessThanK();
+		testDoubleRemove();
 	}
 }

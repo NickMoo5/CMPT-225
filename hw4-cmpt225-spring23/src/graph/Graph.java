@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.NoSuchElementException;
 
 public class Graph {
-	private Map<Integer, List<Integer>> graph = new HashMap<>();
+	private Map<Integer, List<Integer>> graph;
 	private int edges = 0;
 	/**
 	 * creates an empty graph on n nodes
@@ -17,6 +17,7 @@ public class Graph {
 	 */
 	public Graph(int n) {
 		if (n < 0) throw new IllegalArgumentException();
+		graph = new HashMap<Integer, List<Integer>>();
 
 		for (int i = 0; i < n; i++) {
 			addVertex(i);
@@ -65,7 +66,10 @@ public class Graph {
 	 * @param i, j - vertices in the graph
 	 * @return true if (i,j) is an edge in the graph, and false otherwise
 	 */
-	public boolean areAdjacent(int i, int j) {
+	public boolean areAdjacent(int i, int j) throws NoSuchElementException {
+		if (!graph.containsKey(i) || !graph.containsKey(j)) {
+			throw new NoSuchElementException();
+		}
 		if (graph.get(i).contains(j) && graph.get(j).contains(i)) {
 			return true;
 		}
@@ -77,7 +81,11 @@ public class Graph {
 	 * @param i, j - vertices in the graph
 	 * @return true if distance(i,j)<=2, and false otherwise
 	 */
-	public boolean distanceAtMost2(int i, int j) {
+	public boolean distanceAtMost2(int i, int j) throws NoSuchElementException {
+		if (!graph.containsKey(i) || !graph.containsKey(j)) {
+			throw new NoSuchElementException();
+		}
+		if (i == j) return false;
 		if (areAdjacent(i, j)) {
 			return true;
 		}
@@ -106,7 +114,7 @@ public class Graph {
 	 */
 	public Iterator<Integer> neighboursIterator(int i) throws NoSuchElementException {
 		if (!graph.containsKey(i)) throw new NoSuchElementException();
-		return new graphIterator<Integer>(graph.get(i));
+		return new GraphIterator<Integer>(graph.get(i));
 	}
 
 	/**
@@ -128,7 +136,9 @@ public class Graph {
 	 * @param p - number between 0 and 1
 	 * @return a random graph on n vertices, where each edge is added to the graph with probability p
 	 */
-	public static Graph generateRandomGraph(int n, double p) {
+	public static Graph generateRandomGraph(int n, double p) throws IllegalArgumentException {
+		if (n < 0) throw new IllegalArgumentException();
+		if (p > 1.0 || p < 0.0) throw new IllegalArgumentException();
 		Graph randGraph = new Graph(n);
 
 		for (int i = 0; i < n; i++) {
