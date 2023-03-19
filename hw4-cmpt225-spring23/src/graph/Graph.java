@@ -85,7 +85,7 @@ public class Graph {
 		if (!graph.containsKey(i) || !graph.containsKey(j)) {
 			throw new NoSuchElementException();
 		}
-		if (i == j) return false;
+		if (i == j) return true;
 		if (areAdjacent(i, j)) {
 			return true;
 		}
