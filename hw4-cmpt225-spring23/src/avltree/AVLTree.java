@@ -222,7 +222,11 @@ public class AVLTree<T extends Comparable<T>> {
 			balanceTrees(unbalancedNode);
 		}
 
-		updateMinElementNode();
+		if (getRoot() == null) {
+			minElementNode = null;
+		} else {
+			updateMinElementNode();
+		}
 		
 	}
 	private AVLNode<T> delNode(AVLNode<T> curNode) {
@@ -235,7 +239,11 @@ public class AVLTree<T extends Comparable<T>> {
 			newChildNode = curNode.getLeftChild();
 		}
 
-		if (curNode.getData().compareTo(curNode.getParent().getData()) == 0) {
+		if (curNode.isRoot()) {
+			root = newChildNode;
+			if (!curNode.isLeaf()) newChildNode.setParent(null);
+			return newChildNode;
+		} else if (curNode.getData().compareTo(curNode.getParent().getData()) == 0) {
 			if (curNode.getParent().getLeftChild() == curNode) {
 				curNode.getParent().setLeftChild(newChildNode);
 			} else {
@@ -268,7 +276,8 @@ public class AVLTree<T extends Comparable<T>> {
 	/**
 	 * returns the minimal element of the tree in O(1) time
 	 */
-	public T getMin() {
+	public T getMin() throws NoSuchElementException {
+		if (minElementNode == null) throw new NoSuchElementException();
 		return minElementNode.getData();
 	}
 
