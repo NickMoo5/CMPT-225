@@ -16,6 +16,7 @@ public class Puzzle {
 	private int height;
 	private int rowLength;						    // Row length in chars
 	protected final static int SPACE_ASCII_CODE = 32;   // ASCII code for space
+	public final static int NULL_TILE = -1;
 
 	private int[][] board;
 
@@ -163,6 +164,41 @@ public class Puzzle {
 				startNum++;
 			}
 		return solvedBoard;
+	}
+
+	/**
+	 * Changes all tiles NOT in top row and leftmost column to a null tile
+	 * @param board
+	 * @return transformed board
+	 */
+	public static int[][] makeSubGoal(int[][] board) {
+		int height = board.length;
+		int width = board[0].length;
+		if (height < 3 && width < 3) return board;
+		for (int i=1; i < height; i++)
+			for (int j=1; j < width; j++) {
+				board[i][j] = NULL_TILE;
+			}
+		return board;
+	}
+
+	/**
+	 * Removes top row and leftmost column
+	 * @param board - board to be pruned
+	 * @return pruned board - note if board is already 2x2 then it will not be pruned further
+	 */
+	public static int[][] pruneBoard(int[][] board) {
+		int width = board.length;
+		int height = board[0].length;
+		if (height < 3 && width < 3) return board;
+		int [][] prunedBoard = new int[height - 1][width - 1];
+
+		for (int i=0; i < height; i++)
+			for (int j=0; j < width; j++) {
+				prunedBoard[i][j] = board[i+ 1][j + 1];
+			}
+		board = null;
+		return prunedBoard;
 	}
 	
 	@Override
