@@ -12,7 +12,8 @@ public class Puzzle {
 	public final static int RIGHT = 3;
 
 	// size of board
-	private int size;
+	private int width;
+	private int height;
 	private int rowLength;						    // Row length in chars
 	protected final static int SPACE_ASCII_CODE = 32;   // ASCII code for space
 
@@ -30,8 +31,8 @@ public class Puzzle {
 		Scanner reader = new Scanner(file);
 		if (reader.hasNext()) {
 			line = reader.nextLine();
-			size = Integer.parseInt(line);
-			rowLength = (size * 2) + size - 1;
+			height = width = Integer.parseInt(line);
+			rowLength = (width * 2) + width - 1;
 		} else {
 			reader.close();
 			throw new FileNotFoundException("File is Empty");
@@ -41,7 +42,7 @@ public class Puzzle {
 		char character;
 		int ascii;
 		int[] asciiLine  = new int[11];
-		this.board = new int[size][size];
+		this.board = new int[height][width];
 
 		while (reader.hasNext()) {					// Go row by row
 			int index = 0;
@@ -77,10 +78,11 @@ public class Puzzle {
 		reader.close();
 	}
 
-	public Puzzle(int[][] board, int size) {
+	public Puzzle(int[][] board, int height, int width) {
 		this.board = board;
-		this.size = size;
-		this.rowLength = (size * 2) + size - 1;;
+		this.height = height;
+		this.width = width;
+		this.rowLength = (width * 2) + width - 1;
 	}
 
 	/**
@@ -116,11 +118,11 @@ public class Puzzle {
 			if (this.board[row - 1][column] == 0)
 				availableMoves.add(UP);
 
-		if (row < size - 1)							// check if DOWN is valid move
+		if (row < height - 1)							// check if DOWN is valid move
 			if (this.board[row + 1][column] == 0)
 				availableMoves.add(DOWN);
 
-		if (column < size - 1)						// check if RIGHT is valid move
+		if (column < height - 1)						// check if RIGHT is valid move
 			if (this.board[row][column + 1] == 0)
 				availableMoves.add(RIGHT);
 
@@ -133,7 +135,9 @@ public class Puzzle {
 
 	public int[][] getBoard() {return this.board;}
 
-	public int getSize() {return this.size;}
+	public int getWidth() {return this.width;}
+
+	public int getHeight() {return this.height;}
 
 	public int[][] getBoardDeepCopy() {
 		return Arrays.stream(this.board).map(int[]::clone).toArray(int[][]::new);
@@ -141,17 +145,19 @@ public class Puzzle {
 
 	/**
 	 * solvedPuzzle
-	 * @param size - size of board
+	 * @param height - height of board
+	 * @param width - width of board
 	 * @return 2D array representing a solved puzzle board
 	 */
-	public static int[][] solvedPuzzle(int size) {
-		int[][] solvedBoard = new int[size][size];
+	public static int[][] solvedPuzzle(int height, int width) {
+		int[][] solvedBoard = new int[height][width];
 		int startNum = 1;
-		int lastIdx = size - 1;
+		int lastXIdx = width - 1;
+		int lastYIdx = height - 1;
 
-		for (int i=0; i < size; i++)
-			for (int j=0; j < size; j++) {
-				if (i == lastIdx && j == lastIdx)
+		for (int i=0; i < height; i++)
+			for (int j=0; j < width; j++) {
+				if (i == lastYIdx && j == lastXIdx)
 					startNum = 0;
 				solvedBoard[i][j] = startNum;
 				startNum++;
@@ -164,8 +170,8 @@ public class Puzzle {
 		String formattedBoard = "";
 		String strToAppend = null;
 		int val = 0;
-		for (int i=0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
+		for (int i=0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
 				val = this.board[i][j];
 				if (val == 0) {
 					strToAppend = " " + " " + " ";
