@@ -4,19 +4,23 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
+import java.lang.Math;
 
 public class Puzzle {
-	public final static int UP = 0;
-	public final static int DOWN = 1;
-	public final static int LEFT = 2;
-	public final static int RIGHT = 3;
+	public final static char UP = 'U';
+	public final static char DOWN = 'D';
+	public final static char LEFT = 'L';
+	public final static char RIGHT = 'R';
 
 	// size of board
 	private int width;
 	private int height;
 	private int rowLength;						    // Row length in chars
+
+	private int heuristic;
 	protected final static int SPACE_ASCII_CODE = 32;   // ASCII code for space
 	public final static int NULL_TILE = -1;
+	public final static int EMPTY_TILE = 0;
 
 	private int[][] board;
 
@@ -77,6 +81,8 @@ public class Puzzle {
 			rowIdx += 1;						// Count rows
 		}
 		reader.close();
+
+		this.heuristic = 0;
 	}
 
 	public Puzzle(int[][] board, int height, int width) {
@@ -84,13 +90,19 @@ public class Puzzle {
 		this.height = height;
 		this.width = width;
 		this.rowLength = (width * 2) + width - 1;
+		this.heuristic = 0;
 	}
 
 	/**
 	 * Get the number of the tile, and moves it to the specified direction
-	 * 
+	 * @param tile - tile number
+	 * @param direction direction to move tile
 	 */
-	public void makeMove(int rowIdx, int columnIdx, int direction)   {
+	public void makeMove(int tile, int direction)   {
+		int[] tilePos = getTilePos(tile);
+		int rowIdx = tilePos[0];
+		int columnIdx = tilePos[1];
+
 		if (direction == UP) {
 			this.board[rowIdx - 1][columnIdx] = this.board[rowIdx][columnIdx];
 			this.board[rowIdx][columnIdx] = 0;
@@ -106,30 +118,46 @@ public class Puzzle {
 		}
 	}
 
+	private int[] getTilePos(int tile) throws NoSuchElementException {
+		int row = -1;
+		int column = -1;
+
+		for (int i=0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				if (tile == this.board[i][j]) {
+					row = i;
+					column = j;
+					break;
+				}
+			}
+		}
+
+		if (row < 0 || column < 0) throw new NoSuchElementException("Empty Tile not found");
+
+		return new int[] {row, column};
+	}
+
 	/**
 	 * getAvailableMoves
-	 * @param row - row idx of current blank space
-	 * @param column - column idx of current blank space
 	 * @return a list of all available moves
 	 */
-	protected ArrayList<Integer> getAvailableMoves(int row, int column) {
-		ArrayList<Integer> availableMoves = new ArrayList<Integer>();
+	protected Map<Integer, Character> getAvailableMoves() {
+		Map<Integer, Character> availableMoves = new HashMap<Integer, Character>();		// (Tile, direction)
+		int[] emptyTilePos = getTilePos(EMPTY_TILE);
+		int row = emptyTilePos[0];
+		int column = emptyTilePos[1];
 
-		if (row > 0)								// check if UP is valid move
-			if (this.board[row - 1][column] == 0)
-				availableMoves.add(UP);
+		if (row < height - 1)									// check if DOWN is valid move
+			availableMoves.put(this.board[row - 1][column], DOWN);
 
-		if (row < height - 1)							// check if DOWN is valid move
-			if (this.board[row + 1][column] == 0)
-				availableMoves.add(DOWN);
+		if (row > 0)											// check if UP is valid move
+			availableMoves.put(this.board[row + 1][column] , UP);
 
-		if (column < height - 1)						// check if RIGHT is valid move
-			if (this.board[row][column + 1] == 0)
-				availableMoves.add(RIGHT);
+		if (column < height - 1)								// check if LEFT is valid move
+			availableMoves.put(this.board[row][column + 1], LEFT);
 
-		if (column > 0)								// check if LEFT is valid move
-			if (this.board[row][column - 1] == 0)
-				availableMoves.add(LEFT);
+		if (column > 0)											// check if RIGHT is valid move
+			availableMoves.put(this.board[row][column - 1], RIGHT);
 
 		return availableMoves;
 	}
@@ -144,13 +172,81 @@ public class Puzzle {
 		return Arrays.stream(this.board).map(int[]::clone).toArray(int[][]::new);
 	}
 
+	private int getManhattanDistance(int[][] goal) {
+		int manhattanDistance = 0;
+		int boardWidth = board.length;
+		int boardHeight = board[0].length;
+		int goalWidth = goal.length;
+		int goalHeight = goal[0].length;
+
+		if (boardWidth != goalWidth || boardHeight != goalHeight) throw new IllegalArgumentException("board sizes are not equal");
+
+		for (int i=0; i < goalHeight; i++)
+			for (int j=0; j < goalWidth; j++)
+				if (goal[i][j] != NULL_TILE) {
+					int[] boardPosOfTile = getTilePos(goal[i][j]);
+					int yPosofTile = boardPosOfTile[0];
+					int xPosofTile = boardPosOfTile[1];
+					manhattanDistance += Math.abs(i - yPosofTile) + Math.abs(j - xPosofTile);
+				}
+
+		return manhattanDistance;
+	}
+
+	private int getLinearConflict(int[][] goal) {
+		int linearConflictsCounter = 0;
+		int linearConflict = 0;
+		int boardWidth = board.length;
+		int boardHeight = board[0].length;
+		int goalWidth = goal.length;
+		int goalHeight = goal[0].length;
+
+		if (boardWidth != goalWidth || boardHeight != goalHeight) throw new IllegalArgumentException("board sizes are not equal");
+
+		int[] row = board[0];
+		int[] column = new int[boardHeight];
+
+		for (int i= 0; i < goalHeight; i++)		// parse single column of board
+			column[i] = board[i][0];
+
+		for (int i: board[0]) {						// Check if there are nums in correct row
+			for (int j: goal[0])
+				if (i == j) linearConflictsCounter++;
+		}
+
+		if (linearConflictsCounter % 2 == 0) {
+			linearConflict += linearConflictsCounter * 2;
+			linearConflictsCounter = 0;
+		}
+
+		for (int i = 0; i < boardHeight; i++) {
+			for (int j = 0; j < goalHeight; j++) {
+				if (board[i][0] == goal[j][0]) linearConflictsCounter++;
+			}
+		}
+
+		if (linearConflictsCounter % 2 == 0) {
+			linearConflict += linearConflictsCounter * 2;
+		}
+
+		return linearConflict;
+	}
+	public void setHeuristic(int[][] goal) {
+		int heuristic = 0;
+		heuristic += getManhattanDistance(goal);
+		heuristic += getLinearConflict(goal);
+		this.heuristic = heuristic;
+	}
+
+	public int getHeuristic() {return heuristic;}
+
 	/**
-	 * solvedPuzzle
+	 * getSolvedPuzzle
 	 * @param height - height of board
 	 * @param width - width of board
 	 * @return 2D array representing a solved puzzle board
 	 */
-	public static int[][] solvedPuzzle(int height, int width) {
+	public static int[][] getSolvedPuzzle(int height, int width) {
 		int[][] solvedBoard = new int[height][width];
 		int startNum = 1;
 		int lastXIdx = width - 1;
@@ -199,6 +295,22 @@ public class Puzzle {
 			}
 		board = null;
 		return prunedBoard;
+	}
+
+	public static boolean areBoardsEqual(int[][] board, int[][] goal) {
+		int boardWidth = board.length;
+		int boardHeight = board[0].length;
+		int goalWidth = goal.length;
+		int goalHeight = goal[0].length;
+
+		if (boardWidth != goalWidth || boardHeight != goalHeight) throw new IllegalArgumentException("board sizes are not equal");
+
+		for (int i=0; i < boardHeight; i++)
+			for (int j=0; j < boardWidth; j++)
+				if (goal[i][j] != NULL_TILE)
+					if (goal[i][j] != board[i][j]) return false;
+
+		return true;
 	}
 	
 	@Override
