@@ -18,11 +18,16 @@ public class Puzzle {
 	private int rowLength;						    // Row length in chars
 
 	private int heuristic;
+	private int g;
+
+	private int hashCode;
 	protected final static int SPACE_ASCII_CODE = 32;   // ASCII code for space
 	public final static int NULL_TILE = -1;
 	public final static int EMPTY_TILE = 0;
 
 	private int[][] board;
+	private Puzzle parent;
+	private String edgeMove;
 
 	
 	/**
@@ -30,7 +35,7 @@ public class Puzzle {
 	 * @throws FileNotFoundException if file not found
 	 * Reads a board from file and creates the board
 	 */
-	public Puzzle(String fileName) throws IOException, InputMismatchException{
+	public Puzzle(String fileName, int g) throws IOException, InputMismatchException{
 		String line;
 		File file = new File(fileName);
 		Scanner reader = new Scanner(file);
@@ -46,7 +51,7 @@ public class Puzzle {
 		int rowIdx = 0;
 		char character;
 		int ascii;
-		int[] asciiLine  = new int[11];
+		int[] asciiLine  = new int[rowLength];
 		this.board = new int[height][width];
 
 		while (reader.hasNext()) {					// Go row by row
@@ -83,15 +88,32 @@ public class Puzzle {
 		reader.close();
 
 		this.heuristic = 0;
+		this.parent = null;
+		this.edgeMove = null;
+		this.g = g;
+		genHashCode();
 	}
 
-	public Puzzle(int[][] board, int height, int width) {
+	public Puzzle(int[][] board, int g) {
 		this.board = board;
-		this.height = height;
-		this.width = width;
+		this.height = board[0].length;
+		this.width = board.length;
 		this.rowLength = (width * 2) + width - 1;
 		this.heuristic = 0;
+		this.parent = null;
+		this.edgeMove = null;
+		this.g = g;
+		genHashCode();
 	}
+
+	public void setParent(Puzzle puzzle, String move) {
+		parent = puzzle;
+		edgeMove = move;
+	}
+
+	public Puzzle getParent() {return parent;}
+
+	public String getEdgeMove() {return edgeMove;}
 
 	/**
 	 * Get the number of the tile, and moves it to the specified direction
@@ -116,6 +138,8 @@ public class Puzzle {
 			this.board[rowIdx][columnIdx - 1] = this.board[rowIdx][columnIdx];
 			this.board[rowIdx][columnIdx] = 0;
 		}
+
+		genHashCode();
 	}
 
 	private int[] getTilePos(int tile) throws NoSuchElementException {
@@ -147,16 +171,16 @@ public class Puzzle {
 		int row = emptyTilePos[0];
 		int column = emptyTilePos[1];
 
-		if (row < height - 1)									// check if DOWN is valid move
+		if (row < height && row > 0)									// check if DOWN is valid move
 			availableMoves.put(this.board[row - 1][column], DOWN);
 
-		if (row > 0)											// check if UP is valid move
+		if (row >= 0 && row < height - 1)											// check if UP is valid move
 			availableMoves.put(this.board[row + 1][column] , UP);
 
-		if (column < height - 1)								// check if LEFT is valid move
+		if (column < width - 1 && column >= 0)								// check if LEFT is valid move
 			availableMoves.put(this.board[row][column + 1], LEFT);
 
-		if (column > 0)											// check if RIGHT is valid move
+		if (column > 0 && column < width)											// check if RIGHT is valid move
 			availableMoves.put(this.board[row][column - 1], RIGHT);
 
 		return availableMoves;
@@ -168,8 +192,12 @@ public class Puzzle {
 
 	public int getHeight() {return this.height;}
 
-	public int[][] getBoardDeepCopy() {
-		return Arrays.stream(this.board).map(int[]::clone).toArray(int[][]::new);
+	public static int[][] getBoardDeepCopy(Puzzle puz) {
+		return Arrays.stream(puz.getBoard()).map(int[]::clone).toArray(int[][]::new);
+	}
+
+	public static int[][] getArrDeepCopy(int[][] board) {
+		return Arrays.stream(board).map(int[]::clone).toArray(int[][]::new);
 	}
 
 	private int getManhattanDistance(int[][] goal) {
@@ -181,21 +209,29 @@ public class Puzzle {
 
 		if (boardWidth != goalWidth || boardHeight != goalHeight) throw new IllegalArgumentException("board sizes are not equal");
 
-		for (int i=0; i < goalHeight; i++)
-			for (int j=0; j < goalWidth; j++)
+		for (int i=0; i < goalHeight; i++) {
+			for (int j = 0; j < goalWidth; j++)
 				if (goal[i][j] != NULL_TILE) {
 					int[] boardPosOfTile = getTilePos(goal[i][j]);
 					int yPosofTile = boardPosOfTile[0];
 					int xPosofTile = boardPosOfTile[1];
 					manhattanDistance += Math.abs(i - yPosofTile) + Math.abs(j - xPosofTile);
 				}
-
+		}
 		return manhattanDistance;
 	}
 
+	private int checkIfConflict(int numConflicts) {
+		int linearConflict = -1;
+		if (numConflicts % 2 == 0) {
+			linearConflict = numConflicts * 2;
+		}
+		return linearConflict;
+	}
 	private int getLinearConflict(int[][] goal) {
 		int linearConflictsCounter = 0;
 		int linearConflict = 0;
+		int conflicts = 0;
 		int boardWidth = board.length;
 		int boardHeight = board[0].length;
 		int goalWidth = goal.length;
@@ -203,30 +239,29 @@ public class Puzzle {
 
 		if (boardWidth != goalWidth || boardHeight != goalHeight) throw new IllegalArgumentException("board sizes are not equal");
 
-		int[] row = board[0];
-		int[] column = new int[boardHeight];
-
-		for (int i= 0; i < goalHeight; i++)		// parse single column of board
-			column[i] = board[i][0];
-
 		for (int i: board[0]) {						// Check if there are nums in correct row
 			for (int j: goal[0])
 				if (i == j) linearConflictsCounter++;
-		}
-
-		if (linearConflictsCounter % 2 == 0) {
-			linearConflict += linearConflictsCounter * 2;
+			conflicts = checkIfConflict(linearConflictsCounter);
+			if (conflicts >= 0) {
+				linearConflict += conflicts;
+			}
 			linearConflictsCounter = 0;
+			if (boardWidth > 3) break;
+
 		}
 
-		for (int i = 0; i < boardHeight; i++) {
+		for (int i = 0; i < boardHeight; i++) {			// Check if there are nums in correct column
 			for (int j = 0; j < goalHeight; j++) {
 				if (board[i][0] == goal[j][0]) linearConflictsCounter++;
 			}
-		}
+			conflicts = checkIfConflict(linearConflictsCounter);
+			if (conflicts >= 0) {
+				linearConflict += conflicts;
+			}
+			linearConflictsCounter = 0;
+			if (boardWidth > 3) break;
 
-		if (linearConflictsCounter % 2 == 0) {
-			linearConflict += linearConflictsCounter * 2;
 		}
 
 		return linearConflict;
@@ -235,10 +270,20 @@ public class Puzzle {
 		int heuristic = 0;
 		heuristic += getManhattanDistance(goal);
 		heuristic += getLinearConflict(goal);
-		this.heuristic = heuristic;
+		this.heuristic = heuristic + g;
 	}
 
 	public int getHeuristic() {return heuristic;}
+
+	public void setG(int g) {this.g = g;}
+
+	public int getG() {return g;}
+
+	public void setBoard(int[][] board) {
+		this.board = board;
+		width = board.length;
+		height = board[0].length;
+	}
 
 	/**
 	 * getSolvedPuzzle
@@ -270,7 +315,7 @@ public class Puzzle {
 	public static int[][] makeSubGoal(int[][] board) {
 		int height = board.length;
 		int width = board[0].length;
-		if (height < 3 && width < 3) return board;
+		if (height < 4 && width < 4) return board;
 		for (int i=1; i < height; i++)
 			for (int j=1; j < width; j++) {
 				board[i][j] = NULL_TILE;
@@ -281,23 +326,23 @@ public class Puzzle {
 	/**
 	 * Removes top row and leftmost column
 	 * @param board - board to be pruned
-	 * @return pruned board - note if board is already 2x2 then it will not be pruned further
+	 * @return pruned board - note if board is already 3x3 then it will not be pruned further
 	 */
 	public static int[][] pruneBoard(int[][] board) {
 		int width = board.length;
 		int height = board[0].length;
-		if (height < 3 && width < 3) return board;
+		if (height < 4 && width < 4) return board;
 		int [][] prunedBoard = new int[height - 1][width - 1];
 
-		for (int i=0; i < height; i++)
-			for (int j=0; j < width; j++) {
+		for (int i=0; i < height - 1; i++)
+			for (int j=0; j < width - 1; j++) {
 				prunedBoard[i][j] = board[i+ 1][j + 1];
 			}
-		board = null;
 		return prunedBoard;
 	}
 
 	public static boolean areBoardsEqual(int[][] board, int[][] goal) {
+		if (board == null) return false;
 		int boardWidth = board.length;
 		int boardHeight = board[0].length;
 		int goalWidth = goal.length;
@@ -311,6 +356,21 @@ public class Puzzle {
 					if (goal[i][j] != board[i][j]) return false;
 
 		return true;
+	}
+
+	public List<String> getMoves() {
+		List<String> moves = new ArrayList<String>();
+		Stack<Puzzle> s = new Stack<Puzzle>();
+		s.push(this);
+		while (!s.isEmpty()) {
+			Puzzle currPuzzle = s.pop();
+			if (currPuzzle.getParent() != null) {
+				s.add(currPuzzle.getParent());
+				moves.add(currPuzzle.getEdgeMove());
+			}
+		}
+		Collections.reverse(moves);
+		return moves;
 	}
 	
 	@Override
@@ -334,5 +394,26 @@ public class Puzzle {
 			formattedBoard += "\n";
 		}
 		return formattedBoard;
+	}
+
+	private void genHashCode() {
+		int hash = 0;
+		for (int i=0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				hash = (hash * height * width) + board[i][j];
+			}
+		}
+		hashCode = hash + g;
+	}
+
+	@Override
+	public int hashCode() {
+		return hashCode;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || !(obj instanceof Puzzle)) return false;
+		return this.hashCode == obj.hashCode();
 	}
 }
