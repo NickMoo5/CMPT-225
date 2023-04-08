@@ -106,6 +106,15 @@ public class Puzzle {
 		genHashCode();
 	}
 
+	public static Puzzle makeNextPuzzle(Puzzle currPuzzle, int tile, char direction, int[][] goal, int g) {
+		String move = "" + tile + direction;
+		Puzzle newPuzzle = new Puzzle(getBoardDeepCopy(currPuzzle), g);
+		newPuzzle.makeMove(tile, direction);
+		newPuzzle.setParent(currPuzzle, move);
+		//newPuzzle.setHeuristic();
+		return null;
+	}
+
 	public void setParent(Puzzle puzzle, String move) {
 		parent = puzzle;
 		edgeMove = move;
@@ -161,6 +170,25 @@ public class Puzzle {
 		return new int[] {row, column};
 	}
 
+	private int[] getTileDest(int tile, int[][] goal) throws NoSuchElementException {
+		int row = -1;
+		int column = -1;
+
+		for (int i=0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				if (tile == goal[i][j]) {
+					row = i;
+					column = j;
+					break;
+				}
+			}
+		}
+
+		if (row < 0 || column < 0) throw new NoSuchElementException("Tile not found");
+
+		return new int[] {row, column};
+	}
+
 	/**
 	 * getAvailableMoves
 	 * @return a list of all available moves
@@ -200,6 +228,15 @@ public class Puzzle {
 		return Arrays.stream(board).map(int[]::clone).toArray(int[][]::new);
 	}
 
+	private int getTileManhattan(int[][] goal, int tile) {
+		int[] boardTilePos = getTilePos(tile);
+		int boardRow = boardTilePos[0];
+		int boardCol = boardTilePos[1];
+		int[] goalTilePos = getTileDest(tile, goal);
+
+		return 0;
+	}
+
 	private int getManhattanDistance(int[][] goal) {
 		int manhattanDistance = 0;
 		int boardWidth = board.length;
@@ -210,6 +247,7 @@ public class Puzzle {
 		if (boardWidth != goalWidth || boardHeight != goalHeight) throw new IllegalArgumentException("board sizes are not equal");
 
 		for (int i=0; i < goalHeight; i++) {
+			if (i > 0 && boardWidth > 3) goalWidth = 1;
 			for (int j = 0; j < goalWidth; j++)
 				if (goal[i][j] != NULL_TILE) {
 					int[] boardPosOfTile = getTilePos(goal[i][j]);
@@ -221,17 +259,43 @@ public class Puzzle {
 		return manhattanDistance;
 	}
 
-	private int checkIfConflict(int numConflicts) {
-		int linearConflict = -1;
-		if (numConflicts % 2 == 0) {
-			linearConflict = numConflicts * 2;
-		}
-		return linearConflict;
+	private int getPosInRow(int[] row, int tile) {
+		int retVal = -1;
+		for (int i = 0; i < row.length; i++)
+			if (row[i] == tile)
+				retVal = i;
+		return retVal;
 	}
-	private int getLinearConflict(int[][] goal) {
-		int linearConflictsCounter = 0;
+
+	private int getLinearRowConflict(int[] boardRow, int[] goal) {
+		int confictCounter = 0;
+
+		for (int i = 0; i < boardRow.length; i++) {
+			if (boardRow[i] == EMPTY_TILE || boardRow[i] == NULL_TILE) continue;
+			int tilePos = getPosInRow(goal, boardRow[i]);
+			if (tilePos == -1) continue;
+
+			for (int k = i + 1; k < width; k++) {
+				int otherTile = boardRow[k];
+				if (otherTile == EMPTY_TILE || otherTile == NULL_TILE) continue;
+				int otherTilePos = getPosInRow(goal, otherTile);
+				if (otherTilePos == -1) continue;
+				if (otherTilePos <= tilePos) confictCounter++;
+			}
+		}
+		return confictCounter*2;
+	}
+
+	public static int[][] transposeMatrix(int[][] matrix) {
+		int[][] transpose = new int[matrix.length][matrix.length];
+		for(int i = 0; i < matrix.length; i++)
+			for(int j = 0; j < matrix.length; j++)
+				transpose[i][j] = matrix[j][i];
+		return transpose;
+	}
+
+	private int getLinearConflicts(int[][] goal) {
 		int linearConflict = 0;
-		int conflicts = 0;
 		int boardWidth = board.length;
 		int boardHeight = board[0].length;
 		int goalWidth = goal.length;
@@ -239,37 +303,34 @@ public class Puzzle {
 
 		if (boardWidth != goalWidth || boardHeight != goalHeight) throw new IllegalArgumentException("board sizes are not equal");
 
-		for (int i: board[0]) {						// Check if there are nums in correct row
-			for (int j: goal[0])
-				if (i == j) linearConflictsCounter++;
-			conflicts = checkIfConflict(linearConflictsCounter);
-			if (conflicts >= 0) {
-				linearConflict += conflicts;
-			}
-			linearConflictsCounter = 0;
+		for (int i = 0; i < board.length; i++) {
+			linearConflict += getLinearRowConflict(board[i], goal[i]);
 			if (boardWidth > 3) break;
-
 		}
 
-		for (int i = 0; i < boardHeight; i++) {			// Check if there are nums in correct column
-			for (int j = 0; j < goalHeight; j++) {
-				if (board[i][0] == goal[j][0]) linearConflictsCounter++;
-			}
-			conflicts = checkIfConflict(linearConflictsCounter);
-			if (conflicts >= 0) {
-				linearConflict += conflicts;
-			}
-			linearConflictsCounter = 0;
+		int[][] transposedBoard = transposeMatrix(board);
+		int[][] transposedGoal = transposeMatrix(goal);
+		for (int i = 0; i < transposedBoard.length; i++) {
+			linearConflict += getLinearRowConflict(transposedBoard[i], transposedGoal[i]);
 			if (boardWidth > 3) break;
-
 		}
 
 		return linearConflict;
 	}
+
+	private int getHammingDistance(int[][] goal) {
+		int misplacedTiles = 0;
+		for(int i = 0; i < goal.length; i++)
+			for(int j = 0; j < goal.length; j++)
+				if (goal[i][j] != NULL_TILE || goal[i][j] != EMPTY_TILE)
+					if (board[i][j] != goal[i][j]) misplacedTiles++;
+		return misplacedTiles;
+	}
 	public void setHeuristic(int[][] goal) {
 		int heuristic = 0;
 		heuristic += getManhattanDistance(goal);
-		heuristic += getLinearConflict(goal);
+		heuristic += getLinearConflicts(goal);
+		//heuristic += getHammingDistance(goal);
 		this.heuristic = heuristic + g;
 	}
 
@@ -320,6 +381,19 @@ public class Puzzle {
 			for (int j=1; j < width; j++) {
 				board[i][j] = NULL_TILE;
 			}
+
+		return board;
+	}
+
+	public static int[][] makeSubRow(int[][] board) {
+		int height = board.length;
+		int width = board[0].length;
+		if (height < 4 && width < 4) return board;
+		for (int i=1; i < height; i++)
+			for (int j=0; j < width; j++) {
+				board[i][j] = NULL_TILE;
+			}
+
 		return board;
 	}
 
@@ -400,10 +474,30 @@ public class Puzzle {
 		int hash = 0;
 		for (int i=0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				hash = (hash * height * width) + board[i][j];
+				//hash = (hash * height * width) + board[i][j];
+				hash = ((hash ^ board[i][j]) * height);
+				//hash = ((hash + board[j][i] ^ board[i][j]) * height);
+				//hash = (hash ^ (board[i][j] * height)) + 1;
 			}
+			//hash *= i*height;
 		}
+
+		//hashCode = (int) Zobrist.computeHash(board);
 		hashCode = hash + g;
+	}
+
+	private void genHashCodes() {
+		int hash = 0;
+		int sum = 0;
+		for (int i=0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				hash = ((hash ^ board[i][j]) * height);
+				sum += board[i][j];
+			}
+			hash = hash ^ sum;
+		}
+
+		hashCode = hash;
 	}
 
 	@Override
