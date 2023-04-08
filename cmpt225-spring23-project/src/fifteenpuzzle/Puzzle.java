@@ -151,6 +151,24 @@ public class Puzzle {
 		genHashCode();
 	}
 
+	public void moveOne() {
+		int tileOne = 1;
+		int[] tilePos = getTilePos(tileOne);
+		int rowIdx = tilePos[0];
+		int columnIdx = tilePos[1];
+
+		while (rowIdx != 0 && columnIdx != 0) {
+			if (rowIdx > 0) {
+				makeMove(tileOne, UP);
+				rowIdx--;
+			}
+			if (columnIdx > 0) {
+				makeMove(tileOne, LEFT);
+				columnIdx--;
+			}
+		}
+	}
+
 	private int[] getTilePos(int tile) throws NoSuchElementException {
 		int row = -1;
 		int column = -1;
@@ -249,7 +267,7 @@ public class Puzzle {
 		for (int i=0; i < goalHeight; i++) {
 			if (i > 0 && boardWidth > 3) goalWidth = 1;
 			for (int j = 0; j < goalWidth; j++)
-				if (goal[i][j] != NULL_TILE) {
+				if (goal[i][j] != NULL_TILE && goal[i][j] != EMPTY_TILE) {
 					int[] boardPosOfTile = getTilePos(goal[i][j]);
 					int yPosofTile = boardPosOfTile[0];
 					int xPosofTile = boardPosOfTile[1];
@@ -280,7 +298,7 @@ public class Puzzle {
 				if (otherTile == EMPTY_TILE || otherTile == NULL_TILE) continue;
 				int otherTilePos = getPosInRow(goal, otherTile);
 				if (otherTilePos == -1) continue;
-				if (otherTilePos <= tilePos) confictCounter++;
+				if (boardRow[i] > boardRow[k]) confictCounter++;
 			}
 		}
 		return confictCounter*2;
@@ -330,7 +348,7 @@ public class Puzzle {
 		int heuristic = 0;
 		heuristic += getManhattanDistance(goal);
 		heuristic += getLinearConflicts(goal);
-		//heuristic += getHammingDistance(goal);
+		heuristic += getHammingDistance(goal);
 		this.heuristic = heuristic + g;
 	}
 

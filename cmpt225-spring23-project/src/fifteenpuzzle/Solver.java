@@ -12,9 +12,6 @@ public class Solver {
 		PriorityQueue<Puzzle> open = new PriorityQueue<Puzzle>(Comparator.comparing(Puzzle::getHeuristic));
 		Map<Integer, Integer> closed = new HashMap<Integer, Integer>();	// (visited board, g)
 
-		//Puzzle startNode = new Puzzle(filename, g);
-		//int[][] goal = Puzzle.getSolvedPuzzle(startNode.getHeight(), startNode.getWidth());
-		//goal = Puzzle.makeSubGoal(goal);
 		startNode.setHeuristic(goal);
 		open.add(startNode);
 
@@ -140,12 +137,10 @@ public class Solver {
 		int[][] goal = Puzzle.getSolvedPuzzle(startNode.getHeight(), startNode.getWidth());
 		//goal = Puzzle.makeSubGoal(goal);
 		//goal = Puzzle.makeSubRow(goal);
-		int[][] subGoal = Puzzle.makeSubGoal(Puzzle.getArrDeepCopy(goal));
+		//int[][] subGoal = Puzzle.makeSubGoal(Puzzle.getArrDeepCopy(goal));
 
 
-		//int[][] subGoal = goal;
-
-		;
+		int[][] subGoal = goal;
 
 		//startNode.setHeuristic(subGoal);
 
@@ -180,7 +175,7 @@ public class Solver {
 
 		 */
 		long startTime = System.currentTimeMillis();
-		List<String> soln = bigSolver("testcases/board12.txt");
+		List<String> soln = bigSolver("testcases/board19.txt");
 		long finishTime = System.currentTimeMillis();
 		for (String move: soln) {
 			System.out.println(move);
