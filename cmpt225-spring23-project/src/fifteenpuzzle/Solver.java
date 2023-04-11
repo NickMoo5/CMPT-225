@@ -3,14 +3,15 @@ package fifteenpuzzle;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.util.*;
 
 public class Solver {
 
-	public static Puzzle solvePuzzle(Puzzle startNode, int[][] goal) throws IOException {
+	public static Puzzle solvePuzzle(Puzzle startNode, Puzzle goal) throws IOException {
 		PriorityQueue<Puzzle> open = new PriorityQueue<Puzzle>(Comparator.comparing(Puzzle::getHeuristic));
-		HashSet<Integer> closed = new HashSet<Integer>();	// (visited board, g)
-		startNode.setHeuristic(goal);
+		HashSet<Integer> closed = new HashSet<Integer>();
+		startNode.combineHeuristic(goal);
 		open.add(startNode);
 
 		while (!open.isEmpty()) {
@@ -22,17 +23,9 @@ public class Solver {
 			Map<Integer, Character> availableMoves = currPuzzle.getAvailableMoves();
 
 			for (int tile: availableMoves.keySet()) {
-				String move = tile + " " + availableMoves.get(tile);
-				Puzzle nextPuzzle = new Puzzle(Puzzle.getBoardDeepCopy(currPuzzle));
+				Puzzle nextPuzzle = new Puzzle(currPuzzle, goal, tile, availableMoves.get(tile));
 
-				nextPuzzle.makeMove(tile, availableMoves.get(tile));
-				nextPuzzle.setParent(currPuzzle, move);
-
-				if (Puzzle.areBoardsEqual(nextPuzzle.getBoard(), goal)) {
-					return nextPuzzle;
-				}
-
-				nextPuzzle.setHeuristic(goal);
+				if (nextPuzzle.equals(goal)) return nextPuzzle;;
 
 				if (!closed.contains(nextPuzzle.hashCode())) {
 					open.add(nextPuzzle);
@@ -47,7 +40,7 @@ public class Solver {
 		Puzzle puz = null;
 		List<String> soln = new ArrayList<String>();
 		Puzzle startNode = new Puzzle(filename);
-		int[][] goal = Puzzle.getSolvedPuzzle(startNode.getHeight(), startNode.getWidth());
+		Puzzle goal = new Puzzle(startNode.getHeight(), startNode.getWidth());
 
 		puz = solvePuzzle(startNode, goal);
 		soln.addAll(puz.getMoves());
@@ -82,35 +75,37 @@ public class Solver {
 	}
 
 	public static void main(String[] args) throws IOException {
-//		System.out.println("number of arguments: " + args.length);
-//		for (int i = 0; i < args.length; i++) {
-//			System.out.println(args[i]);
-//		}
+		System.out.println("number of arguments: " + args.length);
+		for (int i = 0; i < args.length; i++) {
+			System.out.println(args[i]);
+		}
 
-		/*
+
 		if (args.length < 2) {
 			System.out.println("File names are not specified");
 			System.out.println("usage: java " + MethodHandles.lookup().lookupClass().getName() + " input_file output_file");
 			return;
 		}
 
-		 */
-		//String inputBoard = args[0];
-		//String outputBoard = args[1];
-
+		String inputBoard = args[0];
+		String outputBoard = args[1];
+		List<String> soln = getSolution(inputBoard);
+		outputSolution(outputBoard, soln);
 
 		/*
-		String outputBoard = "TESTING";
+		String outputBoard = "TESTING.txt";
 
 		long startTime = System.currentTimeMillis();
-		List<String> soln = getSolution("testcases/board36.txt");
+		List<String> soln = getSolution("testcases/board33.txt");
 
 		outputSolution(outputBoard, soln);
 		long finishTime = System.currentTimeMillis();
 		System.out.println("RunTime: " + (finishTime - startTime) + "ms");
 
 		 */
-		testSolns("testcases");
+
+
+		//testSolns("testcases");
 
 
 
