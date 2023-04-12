@@ -8,15 +8,20 @@ import java.util.*;
 
 public class Solver {
 
-	public static Puzzle solvePuzzle(Puzzle startNode, Puzzle goal) throws IOException {
+	/**
+	 * PHS algorithm to solve a given puzzle from size 3x3 up to 9x9
+	 * @param startNode
+	 * @param goal
+	 * @return
+	 */
+	public static Puzzle solvePuzzle(Puzzle startNode, Puzzle goal) {
 		PriorityQueue<Puzzle> open = new PriorityQueue<Puzzle>(Comparator.comparing(Puzzle::getHeuristic));
 		HashSet<Integer> closed = new HashSet<Integer>();
-		startNode.combineHeuristic(goal);
+		startNode.calcHeuristic(goal);
 		open.add(startNode);
 
 		while (!open.isEmpty()) {
 			Puzzle currPuzzle = open.poll();
-			//System.out.println(currPuzzle);
 
 			closed.add(currPuzzle.hashCode());
 
@@ -36,6 +41,12 @@ public class Solver {
 		return null;
 	}
 
+	/**
+	 * Obtains solution in a list
+	 * @param filename
+	 * @return
+	 * @throws IOException
+	 */
 	public static List<String> getSolution(String filename) throws IOException {
 		Puzzle puz = null;
 		List<String> soln = new ArrayList<String>();
@@ -44,10 +55,15 @@ public class Solver {
 
 		puz = solvePuzzle(startNode, goal);
 		soln.addAll(puz.getMoves());
-		//System.out.println(puz);
 		return soln;
 	}
 
+	/**
+	 * Outputs solution to file
+	 * @param filename
+	 * @param soln
+	 * @throws IOException
+	 */
 	public static void outputSolution(String filename, List<String> soln) throws IOException {
 		File f = new File(filename);
 		FileWriter fw = new FileWriter(f);
@@ -57,6 +73,11 @@ public class Solver {
 		fw.close();
 	}
 
+	/**
+	 * Test function that runs all boards and outputs time to console
+	 * @param folderPath - path of output
+	 * @throws IOException
+	 */
 	public static void testSolns(String folderPath) throws IOException {
 		File folder = new File(folderPath);
 		File[] listOfFiles = folder.listFiles();
@@ -75,12 +96,6 @@ public class Solver {
 	}
 
 	public static void main(String[] args) throws IOException {
-		System.out.println("number of arguments: " + args.length);
-		for (int i = 0; i < args.length; i++) {
-			System.out.println(args[i]);
-		}
-
-
 		if (args.length < 2) {
 			System.out.println("File names are not specified");
 			System.out.println("usage: java " + MethodHandles.lookup().lookupClass().getName() + " input_file output_file");
@@ -91,28 +106,5 @@ public class Solver {
 		String outputBoard = args[1];
 		List<String> soln = getSolution(inputBoard);
 		outputSolution(outputBoard, soln);
-
-		/*
-		String outputBoard = "TESTING.txt";
-
-		long startTime = System.currentTimeMillis();
-		List<String> soln = getSolution("testcases/board33.txt");
-
-		outputSolution(outputBoard, soln);
-		long finishTime = System.currentTimeMillis();
-		System.out.println("RunTime: " + (finishTime - startTime) + "ms");
-
-		 */
-
-
-		//testSolns("testcases");
-
-
-
-		// TODO
-		//File input = new File(args[0]);
-		// solve...
-		//File output = new File(args[1]);
-
 	}
 }

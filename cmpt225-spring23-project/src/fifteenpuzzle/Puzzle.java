@@ -112,7 +112,7 @@ public class Puzzle {
 		this.parent = parent;
 		this.moveStrPair = tile + " " + direction;
 		makeMove(tile, direction);
-		combineHeuristic(goal);
+		calcHeuristic(goal);
 		genHashCode();
 	}
 
@@ -273,7 +273,11 @@ public class Puzzle {
 		return transpose;
 	}
 
-	public void combineHeuristic(Puzzle goalBoard) {
+	/**
+	 * Calculates heuristic value using Manhattan, Hamming, Euclidean Distance and Linear Conflicts
+	 * @param goalBoard
+	 */
+	public void calcHeuristic(Puzzle goalBoard) {
 		int[][] goal = goalBoard.getBoard();
 		int manhattanDistance = 0;
 		int euclidDist = 0;
@@ -286,10 +290,10 @@ public class Puzzle {
 
 		if (boardWidth != goalWidth || boardHeight != goalHeight) throw new IllegalArgumentException("board sizes are not equal");
 
-		for (int i=0; i < goalHeight; i++) {
-			linearConflict += getLinearRowConflict(board[i], goal[i]);
+		for (int i=0; i < goalHeight; i++) {									// loop through rows
+			linearConflict += getLinearRowConflict(board[i], goal[i]);			// Calculate Linear Conflicts for each row
 
-			for (int j = 0; j < goalWidth; j++)
+			for (int j = 0; j < goalWidth; j++)									// loop through columns
 				if (goal[i][j] != EMPTY_TILE) {
 					int[] boardPosOfTile = getTilePos(goal[i][j]);
 					int yPosofTile = boardPosOfTile[0];
@@ -302,19 +306,21 @@ public class Puzzle {
 				}
 		}
 
+		// transpose board to be able to check linear conflicts in the columns
 		int[][] transposedBoard = transposeMatrix(board);
 		int[][] transposedGoal = transposeMatrix(goal);
-		for (int i = 0; i < transposedBoard.length; i++) {
+		for (int i = 0; i < transposedBoard.length; i++) {			// loop through columns
 			linearConflict += getLinearRowConflict(transposedBoard[i], transposedGoal[i]);
 		}
 
+		// Calculate collective heuristic value
 		int heuristic = 0;
 		double hammingFactor = 1.0;
 		heuristic += 0.6 * manhattanDistance;
 		heuristic += 0.3 * linearConflict;
 		if (heuristic >= 8)
 			hammingFactor = 0.8;
-		heuristic += hammingFactor * misplacedTiles; // 0.8 for 8x8
+		heuristic += hammingFactor * misplacedTiles;
 
 		if (height == 8)
 			heuristic += 0.5*euclidDist;
